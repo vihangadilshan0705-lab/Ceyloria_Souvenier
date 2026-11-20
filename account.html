@@ -179,9 +179,9 @@ function safeText(value) {
 
 async function loadAccount() {
   try {
-    const response = await fetch('/api/auth/me', {
-      credentials: 'same-origin'
-    });
+    const response = awaitfetch('https://ceyloria-souvenier-2.onrender.com/api/auth/me', {
+  credentials: 'include'
+});
 
     const data = await response.json();
 
