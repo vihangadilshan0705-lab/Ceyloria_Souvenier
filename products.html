@@ -46,7 +46,6 @@ header a{color:white;text-decoration:none}
 
 .products-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
 
-/* DESKTOP: 3 PRODUCTS PER ROW */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -54,7 +53,6 @@ header a{color:white;text-decoration:none}
   align-items:stretch;
 }
 
-/* EQUAL HEIGHT PRODUCT CARDS */
 .product-card{
   display:flex;
   flex-direction:column;
@@ -70,7 +68,6 @@ header a{color:white;text-decoration:none}
 .stock-badge{position:absolute;top:12px;left:12px;background:#b52d2d;color:white;padding:7px 11px;border-radius:5px;font-size:12px;font-weight:bold;letter-spacing:.5px;box-shadow:0 2px 7px #0003}
 .sale-badge{position:absolute;top:12px;right:12px;background:#d6ad62;color:#10243d;padding:7px 11px;border-radius:5px;font-size:12px;font-weight:bold;box-shadow:0 2px 7px #0002}
 
-/* PRODUCT INFO */
 .product-info{
   padding:15px;
   display:flex;
@@ -86,7 +83,6 @@ header a{color:white;text-decoration:none}
 .discount-label{display:inline-block;background:#fff0e8;color:#a52b2b;padding:4px 7px;border-radius:4px;font-size:11px;font-weight:bold;margin-top:5px}
 .out-of-stock-info{color:#a52b2b;font-size:13px;font-weight:bold;margin:10px 0}
 
-/* BUY NOW BUTTON AT CARD BOTTOM */
 .product-info .buy-now-card{
   margin-top:auto;
 }
@@ -117,7 +113,6 @@ button{font-family:inherit}
 .status-message{text-align:center;padding:20px;color:#777}
 footer{background:#10243d;color:white;text-align:center;padding:22px;margin-top:35px}
 
-/* TABLET: 2 PRODUCTS PER ROW */
 @media(max-width:850px){
   .layout{grid-template-columns:1fr}
   .categories{display:flex;gap:7px;flex-wrap:wrap}
@@ -128,58 +123,23 @@ footer{background:#10243d;color:white;text-align:center;padding:22px;margin-top:
   }
 }
 
-/* MOBILE: 2 PRODUCTS PER ROW */
 @media(max-width:550px){
   .products-grid{
     grid-template-columns:repeat(2,minmax(0,1fr));
     gap:10px;
   }
 
-  .product-card img{
-    height:150px;
-  }
-
-  .product-info{
-    padding:10px;
-  }
-
-  .product-info h3{
-    font-size:14px;
-  }
-
-  .category-name{
-    font-size:10px;
-  }
-
-  .price{
-    font-size:15px;
-  }
-
-  .price-old{
-    font-size:11px;
-  }
-
-  .price-new{
-    font-size:17px;
-  }
-
-  .discount-label{
-    font-size:10px;
-  }
-
-  .buy-now-card{
-    padding:10px 5px;
-    font-size:12px;
-  }
-
-  .cart-line{
-    grid-template-columns:60px 1fr;
-  }
-
-  .cart-line img{
-    width:60px;
-    height:60px;
-  }
+  .product-card img{height:150px}
+  .product-info{padding:10px}
+  .product-info h3{font-size:14px}
+  .category-name{font-size:10px}
+  .price{font-size:15px}
+  .price-old{font-size:11px}
+  .price-new{font-size:17px}
+  .discount-label{font-size:10px}
+  .buy-now-card{padding:10px 5px;font-size:12px}
+  .cart-line{grid-template-columns:60px 1fr}
+  .cart-line img{width:60px;height:60px}
 }
 </style>
 </head>
@@ -232,7 +192,6 @@ footer{background:#10243d;color:white;text-align:center;padding:22px;margin-top:
   </div>
 </div>
 
-<!-- CHECKOUT -->
 <div class="modal" id="checkoutModal">
   <div class="modal-box">
     <button class="close" onclick="closeModal('checkoutModal')">&times;</button>
@@ -261,7 +220,7 @@ footer{background:#10243d;color:white;text-align:center;padding:22px;margin-top:
       Please sign in to your Ceyloria account before placing an order.
     </div>
 
-    <button class="primary full" onclick="placeOrder()">Place Order</button>
+    <button class="primary full" id="placeOrderButton" onclick="placeOrder()">Place Order</button>
     <p id="checkoutMessage"></p>
   </div>
 </div>
@@ -269,7 +228,9 @@ footer{background:#10243d;color:white;text-align:center;padding:22px;margin-top:
 <footer>© 2026 Ceyloria Souvenirs. All Rights Reserved.</footer>
 
 <script>
-/* 10 PRODUCTS PER PAGE */
+const API_BASE = "https://ceyloria-souvenier-2.onrender.com";
+
+/* 12 PRODUCTS PER PAGE */
 const PRODUCTS_PER_PAGE = 12;
 
 let products = [];
@@ -433,8 +394,8 @@ async function loadProducts() {
   grid.innerHTML = '<div class="status-message">Loading products...</div>';
 
   try {
-    const response = await fetch("/api/products", {
-      credentials: "same-origin"
+    const response = await fetch(API_BASE + "/api/products", {
+      credentials: "include"
     });
 
     if (!response.ok) {
@@ -856,7 +817,6 @@ function getPrice(product, size) {
   return getProductPrice(product, size);
 }
 
-// Add product with full details to localStorage
 function addToCart(product, size, quantity) {
   if (isOutOfStock(product)) {
     alert("Sorry, this product is currently out of stock.");
@@ -931,17 +891,19 @@ function goCheckout() {
 // PLACE ORDER
 async function placeOrder() {
   const message = document.getElementById("checkoutMessage");
+  const button = document.getElementById("placeOrderButton");
 
   if (!cart.length) {
     message.textContent = "Your cart is empty.";
     return;
   }
 
+  button.disabled = true;
   message.textContent = "Checking your account...";
 
   try {
-    const authResponse = await fetch("/api/auth/me", {
-      credentials: "same-origin"
+    const authResponse = await fetch(API_BASE + "/api/auth/me", {
+      credentials: "include"
     });
 
     const authData = await authResponse.json();
@@ -949,6 +911,7 @@ async function placeOrder() {
     if (!authResponse.ok || !authData.loggedIn || !authData.customer) {
       message.innerHTML =
         'Please <a href="login.html">login</a> to place your order.';
+      button.disabled = false;
       return;
     }
 
@@ -961,9 +924,9 @@ async function placeOrder() {
 
     message.textContent = "Placing your order...";
 
-    const response = await fetch("/api/orders", {
+    const response = await fetch(API_BASE + "/api/orders", {
       method: "POST",
-      credentials: "same-origin",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json"
       },
@@ -990,12 +953,14 @@ async function placeOrder() {
         "./invoice.html?token=" + encodeURIComponent(result.invoiceToken);
     } else {
       message.textContent = result.message || "Order placed successfully!";
+      button.disabled = false;
     }
 
   } catch(error) {
     console.error(error);
     message.textContent =
       error.message || "Unable to place order. Please try again.";
+    button.disabled = false;
   }
 }
 
