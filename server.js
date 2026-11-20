@@ -869,27 +869,149 @@ function deleteProfileImage(image) {
   }
 }
 
-async function sendWelcomeEmail(customer) {
-  const html = `
-    <div style="font-family:Arial;padding:25px;color:#10243d">
-      <h2 style="color:#d4ad58">Welcome to Ceyloria!</h2>
-      <p>Hello ${escapeHtml(customer.name)},</p>
-      <p>Your Ceyloria customer account has been created successfully.</p>
-      <p>Thank you for joining us.</p>
-      <p><b>Ceyloria Souvenirs</b></p>
-    </div>
-  `;
 
-  return sendMail({
+async function sendWelcomeEmail(customer) {
+  const name = escapeHtml(customer.name);
+  const email = escapeHtml(customer.email);
+  const phone = escapeHtml(customer.phone);
+  const address = escapeHtml(customer.address);
+
+  function emailTemplate(title, message, isOwner = false) {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin:0;padding:0;background:#f3f5f8;font-family:Arial,sans-serif;">
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="padding:30px 12px;background:#f3f5f8;">
+        <tr>
+          <td align="center">
+
+            <table width="600" cellpadding="0" cellspacing="0"
+              style="max-width:600px;width:100%;background:#fff;border-radius:12px;overflow:hidden;">
+
+              <tr>
+                <td align="center"
+                  style="background:#10243d;padding:32px 20px;border-bottom:4px solid #d4ad58;">
+
+                  <h1 style="margin:0;color:#d4ad58;font-size:28px;letter-spacing:2px;">
+                    CEYLORIA
+                  </h1>
+
+                  <p style="color:#fff;font-size:12px;letter-spacing:2px;margin:8px 0 0;">
+                    SOUVENIRS
+                  </p>
+
+                  <p style="color:#e8d8b5;font-size:11px;margin:15px 0 0;">
+                    HANDCRAFTED IN SRI LANKA
+                  </p>
+
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:35px 30px;">
+
+                  <h2 style="color:#10243d;font-size:23px;">
+                    ${title}
+                  </h2>
+
+                  <p style="color:#555;font-size:14px;line-height:1.8;">
+                    ${message}
+                  </p>
+
+                  <div style="background:#f8f6f0;border-left:4px solid #d4ad58;padding:18px;margin:25px 0;">
+
+                    <h3 style="color:#10243d;margin:0 0 15px;font-size:16px;">
+                      ${isOwner ? 'New Customer Details' : 'Your Account Details'}
+                    </h3>
+
+                    <p style="color:#555;font-size:13px;line-height:1.8;margin:0;">
+                      <b>Name:</b> ${name}<br>
+                      <b>Email:</b> ${email}<br>
+                      ${isOwner ? `<b>Phone:</b> ${phone}<br><b>Address:</b> ${address}` : '<b>Account Status:</b> Successfully Created'}
+                    </p>
+
+                  </div>
+
+                  ${!isOwner ? `
+                  <div style="text-align:center;margin:30px 0;">
+
+                    <a href="${escapeHtml(baseUrl)}/products.html"
+                      style="display:inline-block;background:#d4ad58;color:#10243d;text-decoration:none;padding:14px 28px;border-radius:5px;font-weight:bold;font-size:13px;">
+                      EXPLORE OUR PRODUCTS
+                    </a>
+
+                  </div>
+                  ` : ''}
+
+                  <p style="color:#777;font-size:13px;line-height:1.7;">
+                    ${isOwner
+                      ? 'A new customer has successfully registered on your Ceyloria website.'
+                      : 'Thank you for joining us. We are delighted to welcome you to the Ceyloria family.'}
+                  </p>
+
+                </td>
+              </tr>
+
+              <tr>
+                <td align="center"
+                  style="background:#10243d;padding:25px 20px;">
+
+                  <p style="color:#d4ad58;font-size:16px;font-weight:bold;margin:0 0 10px;">
+                    Ceyloria Souvenirs
+                  </p>
+
+                  <p style="color:#fff;font-size:12px;line-height:1.8;margin:0;">
+                    A Little Piece of Ceylon to Take Home<br>
+                    Bandaragama, Sri Lanka<br>
+                    WhatsApp: +94 70 422 1120<br>
+                    Contact: ceyloriasouvenirs@gmail.com
+                  </p>
+
+                  <p style="color:#b8c1ce;font-size:10px;margin:20px 0 0;">
+                    © ${new Date().getFullYear()} Ceyloria Souvenirs. All rights reserved.
+                  </p>
+
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </body>
+    </html>
+    `;
+  }
+
+  const customerSent = await sendMail({
     to: customer.email,
-    subject: 'Welcome to Ceyloria Souvenirs',
-    html
+    subject: 'Welcome to Ceyloria Souvenirs!',
+    html: emailTemplate(
+      'Welcome to Ceyloria!',
+      `Dear ${name}, your Ceyloria customer account has been successfully created. Thank you for joining us!`
+    )
   });
+
+  const ownerSent = await sendMail({
+    to: ownerEmail,
+    subject: 'New Customer Registration - Ceyloria',
+    html: emailTemplate(
+      'New Customer Registered!',
+      'A new customer has created an account on your Ceyloria website.',
+      true
+    )
+  });
+
+  return { customerSent, ownerSent };
 }
 
-// =====================================
-// STAFF HELPER FUNCTIONS
-// =====================================
 
 function cleanPermissions(value) {
   let permissions = value;
@@ -1298,18 +1420,20 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       address
     };
 
-    const emailSent = await sendWelcomeEmail(customer);
+  
+const emailStatus = await sendWelcomeEmail(customer);
 
-    db.prepare(`
-      UPDATE customers
-      SET registration_email_sent = ?,
-          welcome_email_sent = ?
-      WHERE id = ?
-    `).run(
-      emailSent ? 1 : 0,
-      emailSent ? 1 : 0,
-      customerId
-    );
+db.prepare(`
+  UPDATE customers
+  SET registration_email_sent = ?,
+      welcome_email_sent = ?
+  WHERE id = ?
+`).run(
+  emailStatus.ownerSent ? 1 : 0,
+  emailStatus.customerSent ? 1 : 0,
+  customerId
+);
+
 
     res.json({
       success: true,
@@ -1791,43 +1915,198 @@ function invoiceHtml(data) {
 // ORDER EMAILS
 // =====================================
 
+
 async function sendOrderEmails(row, data, invoiceUrl, trackingUrl) {
-  const html = `
-    <div style="font-family:Arial;color:#10243d;padding:20px">
-      <h2 style="color:#d4ad58">Ceyloria Order Received</h2>
-      <p><b>Order:</b> ${escapeHtml(data.orderNumber)}</p>
-      <p><b>Customer:</b> ${escapeHtml(data.name)}</p>
-      <p><b>Phone:</b> ${escapeHtml(data.phone)}</p>
-      <p><b>Email:</b> ${escapeHtml(data.email)}</p>
-      <p><b>Address:</b> ${escapeHtml(data.address)}</p>
-      <p><b>Payment:</b> ${escapeHtml(data.payment)}</p>
-      <p><b>Total:</b> Rs. ${Number(data.subtotal).toLocaleString()}</p>
-      <p><b>Order Status:</b> ${escapeHtml(data.status)}</p>
-      <p>
-        <a href="${escapeHtml(invoiceUrl)}"
-          style="background:#10243d;color:white;padding:12px 18px;text-decoration:none">
-          View Invoice
-        </a>
-      </p>
-      <p>
-        <a href="${escapeHtml(trackingUrl)}"
-          style="background:#d4ad58;color:#10243d;padding:12px 18px;text-decoration:none">
-          Track Your Order
-        </a>
-      </p>
-    </div>
-  `;
+  const orderNumber = escapeHtml(data.orderNumber);
+  const customerName = escapeHtml(data.name);
+  const customerEmail = escapeHtml(data.email);
+  const customerPhone = escapeHtml(data.phone);
+  const customerAddress = escapeHtml(data.address);
+  const payment = escapeHtml(data.payment);
+  const status = escapeHtml(data.status);
+  const total = Number(data.subtotal || 0).toLocaleString('en-LK');
+
+  function createEmail(title, message, isOwner = false) {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta charset="UTF-8">
+    </head>
+    <body style="margin:0;padding:0;background:#f3f5f8;font-family:Arial,sans-serif;">
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="background:#f3f5f8;padding:30px 12px;">
+        <tr>
+          <td align="center">
+
+            <table width="600" cellpadding="0" cellspacing="0"
+              style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;">
+
+              <tr>
+                <td align="center"
+                  style="background:#10243d;padding:32px 20px;border-bottom:4px solid #d4ad58;">
+
+                  <h1 style="margin:0;color:#d4ad58;font-size:28px;letter-spacing:2px;">
+                    CEYLORIA
+                  </h1>
+
+                  <p style="margin:8px 0 0;color:#ffffff;font-size:12px;letter-spacing:1px;">
+                    SOUVENIRS
+                  </p>
+
+                  <p style="margin:15px 0 0;color:#e8d8b5;font-size:11px;">
+                    HANDCRAFTED IN SRI LANKA
+                  </p>
+
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:35px 30px 15px;">
+
+                  <h2 style="color:#10243d;font-size:23px;margin:0 0 15px;">
+                    ${title}
+                  </h2>
+
+                  <p style="color:#555;line-height:1.7;font-size:14px;">
+                    ${message}
+                  </p>
+
+                  <div style="background:#f8f6f0;border-left:4px solid #d4ad58;padding:15px;margin:25px 0;">
+
+                    <p style="margin:0 0 8px;color:#777;font-size:12px;">
+                      ORDER NUMBER
+                    </p>
+
+                    <h2 style="margin:0;color:#10243d;font-size:20px;">
+                      ${orderNumber}
+                    </h2>
+
+                  </div>
+
+                  <h3 style="color:#10243d;font-size:16px;border-bottom:1px solid #eeeeee;padding-bottom:10px;">
+                    Order Summary
+                  </h3>
+
+                  <table width="100%" cellpadding="8" cellspacing="0"
+                    style="font-size:13px;color:#555;">
+
+                    <tr>
+                      <td>Customer Name</td>
+                      <td align="right"><b>${customerName}</b></td>
+                    </tr>
+
+                    ${isOwner ? `
+                    <tr>
+                      <td>Email</td>
+                      <td align="right">${customerEmail}</td>
+                    </tr>
+                    <tr>
+                      <td>Phone</td>
+                      <td align="right">${customerPhone}</td>
+                    </tr>
+                    <tr>
+                      <td>Delivery Address</td>
+                      <td align="right">${customerAddress}</td>
+                    </tr>
+                    ` : ''}
+
+                    <tr>
+                      <td>Payment Method</td>
+                      <td align="right">${payment}</td>
+                    </tr>
+
+                    <tr>
+                      <td>Order Status</td>
+                      <td align="right">${status}</td>
+                    </tr>
+
+                    <tr>
+                      <td style="border-top:1px solid #ddd;padding-top:15px;">
+                        <b>Total Amount</b>
+                      </td>
+
+                      <td align="right"
+                        style="border-top:1px solid #ddd;padding-top:15px;color:#b18a36;font-size:19px;">
+                        <b>Rs. ${total}</b>
+                      </td>
+                    </tr>
+
+                  </table>
+
+                  <div style="text-align:center;margin:30px 0 15px;">
+
+                    <a href="${escapeHtml(invoiceUrl)}"
+                      style="display:inline-block;background:#10243d;color:#ffffff;text-decoration:none;padding:14px 25px;border-radius:5px;font-size:13px;font-weight:bold;margin:5px;">
+                      VIEW INVOICE
+                    </a>
+
+                    <a href="${escapeHtml(trackingUrl)}"
+                      style="display:inline-block;background:#d4ad58;color:#10243d;text-decoration:none;padding:14px 25px;border-radius:5px;font-size:13px;font-weight:bold;margin:5px;">
+                      TRACK ORDER
+                    </a>
+
+                  </div>
+
+                  <p style="text-align:center;color:#888;font-size:12px;line-height:1.6;">
+                    Keep your order number for future reference.
+                  </p>
+
+                </td>
+              </tr>
+
+              <tr>
+                <td align="center"
+                  style="background:#10243d;padding:25px 20px;">
+
+                  <p style="color:#d4ad58;font-size:16px;font-weight:bold;margin:0 0 10px;">
+                    Ceyloria Souvenirs
+                  </p>
+
+                  <p style="color:#ffffff;font-size:12px;line-height:1.8;margin:0;">
+                    A Little Piece of Ceylon to Take Home<br>
+                    Bandaragama, Sri Lanka<br>
+                    WhatsApp: +94 70 422 1120<br>
+                    Contact: ceyloriasouvenirs@gmail.com
+                  </p>
+
+                  <p style="color:#b8c1ce;font-size:10px;margin:20px 0 0;">
+                    © ${new Date().getFullYear()} Ceyloria Souvenirs. All rights reserved.
+                  </p>
+
+                </td>
+              </tr>
+
+            </table>
+
+          </td>
+        </tr>
+      </table>
+
+    </body>
+    </html>
+    `;
+  }
 
   const ownerSent = await sendMail({
     to: ownerEmail,
     subject: `New Ceyloria Order - ${data.orderNumber}`,
-    html
+    html: createEmail(
+      'New Order Received!',
+      'A new customer order has been placed on your Ceyloria website.',
+      true
+    )
   });
 
   const customerSent = await sendMail({
     to: data.email,
-    subject: `Your Ceyloria Order - ${data.orderNumber}`,
-    html
+    subject: `Order Confirmation - ${data.orderNumber} | Ceyloria`,
+    html: createEmail(
+      'Thank You for Your Order!',
+      `Dear ${customerName}, thank you for choosing Ceyloria Souvenirs. Your order has been successfully received. We will keep you updated on its progress.`
+    )
   });
 
   db.prepare(`
@@ -1844,23 +2123,6 @@ async function sendOrderEmails(row, data, invoiceUrl, trackingUrl) {
   return { ownerSent, customerSent };
 }
 
-// =====================================
-// CREATE ORDER + AUTOMATIC STOCK UPDATE
-// =====================================
-
-app.post('/api/orders', requireCustomer, async (req, res) => {
-  try {
-    const customer = db.prepare(`
-      SELECT *
-      FROM customers
-      WHERE id = ?
-    `).get(req.session.customerId);
-
-    if (!customer) {
-      return res.status(401).json({
-        error: 'Please login again.'
-      });
-    }
 
     const body = req.body || {};
     const items = Array.isArray(body.items) ? body.items : [];
