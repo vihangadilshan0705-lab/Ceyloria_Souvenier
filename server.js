@@ -2055,21 +2055,24 @@ app.post('/api/orders', requireCustomer, async (req, res) => {
     const trackingUrl =
       `${baseUrl}/track.html?token=${token}`;
 
-    const emailStatus = await sendOrderEmails(
-      row,
-      data,
-      invoiceUrl,
-      trackingUrl
-    );
+res.json({
+  success: true,
+  orderNumber,
+  invoiceToken: token,
+  invoiceUrl,
+  trackingUrl,
+  emailStatus: 'processing'
+});
 
-    res.json({
-      success: true,
-      orderNumber,
-      invoiceToken: token,
-      invoiceUrl,
-      trackingUrl,
-      emailStatus
-    });
+sendOrderEmails(row, data, invoiceUrl, trackingUrl)
+  .then(emailStatus => {
+    console.log('Order email status:', emailStatus);
+  })
+  .catch(error => {
+    console.error('Order email error:', error);
+  });
+
+return;
   } catch (error) {
     console.error('Order error:', error);
 
