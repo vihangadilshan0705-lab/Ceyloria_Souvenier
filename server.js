@@ -6,7 +6,6 @@ const session = require('express-session');
 const SQLiteStoreFactory = require('connect-sqlite3');
 const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
@@ -654,18 +653,11 @@ const trackLimiter = rateLimit({
 // EMAIL
 // =====================================
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: Number(process.env.SMTP_PORT || 465),
-  secure: Number(process.env.SMTP_PORT || 465) === 465,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+const BREVO_SENDER_EMAIL = 'ceyloriasouvenirs@gmail.com';
+const BREVO_SENDER_NAME = 'Ceyloria Souvenirs';
 
 const ownerEmail = process.env.OWNER_EMAIL ||
-  process.env.SMTP_USER ||
   'vihangadilshan0705@gmail.com';
 
 const baseUrl = (
@@ -674,27 +666,74 @@ const baseUrl = (
 
 function emailConfigured() {
   return Boolean(
-    process.env.SMTP_USER && process.env.SMTP_PASS
+    process.env.BREVO_API_KEY
   );
 }
 
 async function sendMail(options) {
   if (!emailConfigured()) {
     console.log(
-      'EMAIL NOT CONFIGURED: Check SMTP_USER and SMTP_PASS in .env'
+      'EMAIL NOT CONFIGURED: Check BREVO_API_KEY in Render Environment Variables.'
     );
     return false;
   }
 
   try {
-    await transporter.sendMail({
-      from: `"Ceyloria Souvenirs" <${process.env.SMTP_USER}>`,
-      ...options
+    const recipients = Array.isArray(options.to)
+      ? options.to.map(recipient => {
+          if (typeof recipient === 'string') {
+            return { email: recipient };
+          }
+
+          return {
+            email: recipient.email,
+            ...(recipient.name ? { name: recipient.name } : {})
+          };
+        })
+      : [{ email: options.to }];
+
+    const payload = {
+      sender: {
+        name: BREVO_SENDER_NAME,
+        email: BREVO_SENDER_EMAIL
+      },
+      to: recipients,
+      subject: String(options.subject || ''),
+      htmlContent: String(options.html || options.htmlContent || '')
+    };
+
+    if (options.text) {
+      payload.textContent = String(options.text);
+    }
+
+    const response = await fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     });
+
+    if (!response.ok) {
+      let details = '';
+
+      try {
+        const errorBody = await response.text();
+        details = errorBody ? ` - ${errorBody}` : '';
+      } catch (_) {
+        // Ignore response parsing errors and keep the HTTP status.
+      }
+
+      throw new Error(
+        `Brevo API ${response.status} ${response.statusText}${details}`
+      );
+    }
 
     return true;
   } catch (error) {
-    console.error('Email error:', error.message);
+    console.error('Brevo email error:', error.message);
     return false;
   }
 }
@@ -2123,7 +2162,12 @@ async function sendOrderEmails(row, data, invoiceUrl, trackingUrl) {
   return { ownerSent, customerSent };
 }
 
+// =====================================
+// CREATE ORDER
+// =====================================
 
+app.post('/api/orders', async (req, res) => {
+  try {
     const body = req.body || {};
     const items = Array.isArray(body.items) ? body.items : [];
 
