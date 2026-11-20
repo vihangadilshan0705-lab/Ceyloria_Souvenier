@@ -15,7 +15,34 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+// =====================================
+// CORS CONFIGURATION
+// =====================================
 
+app.use((req, res, next) => {
+  res.header(
+    'Access-Control-Allow-Origin',
+    'https://vihangadilshan0705-lab.github.io'
+  );
+
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  res.header(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+  );
+
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization'
+  );
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '25mb' }));
@@ -591,11 +618,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  }
+  httpOnly: true,
+  sameSite: 'none',
+  secure: true,
+  maxAge: 7 * 24 * 60 * 60 * 1000
+}
 }));
 
 // =====================================
