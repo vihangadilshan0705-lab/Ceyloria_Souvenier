@@ -1,0 +1,485 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopping Cart | Ceyloria</title>
+
+<style>
+:root {
+  --navy:#10243d;
+  --navy2:#183654;
+  --gold:#d4ad58;
+  --cream:#f8f5ee;
+  --text:#263445;
+}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body {
+  font-family:Arial,sans-serif;
+  background:var(--cream);
+  color:var(--text);
+}
+
+header {
+  background:var(--navy);
+  color:white;
+  padding:18px 6%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo {
+  color:var(--gold);
+  font-size:25px;
+  font-weight:bold;
+  letter-spacing:1px;
+}
+
+.back-link {
+  color:white;
+  text-decoration:none;
+  border:1px solid var(--gold);
+  padding:10px 16px;
+  border-radius:6px;
+}
+
+.back-link:hover {
+  background:var(--gold);
+  color:var(--navy);
+}
+
+.container {
+  max-width:1100px;
+  margin:40px auto;
+  padding:0 20px;
+}
+
+h1 {
+  color:var(--navy);
+  margin-bottom:25px;
+}
+
+.cart-layout {
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:25px;
+  align-items:start;
+}
+
+.cart-items {
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.cart-item {
+  background:white;
+  border-radius:10px;
+  padding:18px;
+  display:grid;
+  grid-template-columns:110px 1fr auto;
+  gap:18px;
+  align-items:center;
+  box-shadow:0 3px 12px rgba(0,0,0,.05);
+}
+
+.cart-item img {
+  width:110px;
+  height:110px;
+  object-fit:cover;
+  border-radius:7px;
+  background:#f1f1f1;
+}
+
+.item-name {
+  font-size:18px;
+  color:var(--navy);
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.item-size {
+  color:#777;
+  font-size:14px;
+  margin-bottom:8px;
+}
+
+.item-price {
+  color:#9a742e;
+  font-weight:bold;
+}
+
+.quantity {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+}
+
+.quantity button {
+  width:30px;
+  height:30px;
+  border:none;
+  border-radius:5px;
+  background:var(--navy);
+  color:white;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.quantity span {
+  min-width:25px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.item-right {
+  text-align:right;
+}
+
+.subtotal {
+  font-weight:bold;
+  color:var(--navy);
+  margin-bottom:15px;
+  white-space:nowrap;
+}
+
+.remove-btn {
+  border:none;
+  background:#fff0f0;
+  color:#c62828;
+  padding:9px 12px;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.summary {
+  background:white;
+  padding:22px;
+  border-radius:10px;
+  box-shadow:0 3px 12px rgba(0,0,0,.05);
+  position:sticky;
+  top:20px;
+}
+
+.summary h2 {
+  color:var(--navy);
+  margin-bottom:20px;
+}
+
+.summary-row {
+  display:flex;
+  justify-content:space-between;
+  margin:15px 0;
+  gap:10px;
+}
+
+.total-row {
+  border-top:1px solid #ddd;
+  padding-top:18px;
+  font-size:19px;
+  font-weight:bold;
+  color:var(--navy);
+}
+
+.checkout-btn {
+  width:100%;
+  padding:15px;
+  margin-top:15px;
+  background:var(--gold);
+  color:var(--navy);
+  border:none;
+  border-radius:7px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.checkout-btn:hover {
+  background:#c49a42;
+}
+
+.continue-btn {
+  display:block;
+  text-align:center;
+  margin-top:15px;
+  color:var(--navy);
+  text-decoration:none;
+}
+
+.empty {
+  background:white;
+  text-align:center;
+  padding:60px 20px;
+  border-radius:10px;
+}
+
+.empty h2 {
+  color:var(--navy);
+  margin-bottom:12px;
+}
+
+.empty a {
+  display:inline-block;
+  margin-top:20px;
+  background:var(--gold);
+  color:var(--navy);
+  padding:12px 20px;
+  text-decoration:none;
+  border-radius:6px;
+  font-weight:bold;
+}
+
+footer {
+  margin-top:60px;
+  padding:25px;
+  text-align:center;
+  background:var(--navy);
+  color:white;
+}
+
+@media(max-width:750px) {
+  .cart-layout {
+    grid-template-columns:1fr;
+  }
+
+  .cart-item {
+    grid-template-columns:80px 1fr;
+    gap:12px;
+  }
+
+  .cart-item img {
+    width:80px;
+    height:90px;
+  }
+
+  .item-right {
+    grid-column:2;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .subtotal {
+    margin:0;
+  }
+
+  .summary {
+    position:static;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">CEYLORIA</div>
+  <a href="products.html" class="back-link">← Continue Shopping</a>
+</header>
+
+<main class="container">
+  <h1>🛒 Shopping Cart</h1>
+
+  <div id="emptyCart" class="empty" style="display:none">
+    <h2>Your Cart is Empty</h2>
+    <p>You haven't added any products to your cart yet.</p>
+    <a href="products.html">Explore Products</a>
+  </div>
+
+  <div id="cartLayout" class="cart-layout" style="display:none">
+    <div id="cartItems" class="cart-items"></div>
+
+    <aside class="summary">
+      <h2>Order Summary</h2>
+
+      <div class="summary-row">
+        <span>Items</span>
+        <strong id="itemCount">0</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong id="subtotal">Rs. 0.00</strong>
+      </div>
+
+      <div class="summary-row total-row">
+        <span>Total</span>
+        <span id="total">Rs. 0.00</span>
+      </div>
+
+      <button class="checkout-btn" onclick="proceedToCheckout()">
+        Proceed to Checkout →
+      </button>
+
+      <a href="products.html" class="continue-btn">
+        Continue Shopping
+      </a>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  © 2026 Ceyloria Souvenirs. All Rights Reserved.
+</footer>
+
+<script>
+const CART_KEY = "ceyloriaCart";
+
+function getCart() {
+  try {
+    const data = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCart(cart) {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
+function money(value) {
+  return "Rs. " + Number(value || 0).toLocaleString("en-LK", {
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function getItemId(item) {
+  return String(item.id ?? item.productId ?? "");
+}
+
+function renderCart() {
+  const cart = getCart();
+  const empty = document.getElementById("emptyCart");
+  const layout = document.getElementById("cartLayout");
+  const container = document.getElementById("cartItems");
+
+  if (!cart.length) {
+    empty.style.display = "block";
+    layout.style.display = "none";
+    return;
+  }
+
+  empty.style.display = "none";
+  layout.style.display = "grid";
+  container.innerHTML = "";
+
+  let total = 0;
+  let count = 0;
+
+  cart.forEach((item, index) => {
+    const quantity = Math.max(1, Number(item.quantity || 1));
+    const price = Number(item.price || 0);
+    const subtotal = price * quantity;
+
+    total += subtotal;
+    count += quantity;
+
+    const card = document.createElement("div");
+    card.className = "cart-item";
+
+    const image = document.createElement("img");
+    image.src = item.image || item.imageUrl || "";
+    image.alt = item.name || item.title || "Product";
+    image.onerror = () => {
+      image.style.visibility = "hidden";
+    };
+
+    const details = document.createElement("div");
+
+    const name = document.createElement("div");
+    name.className = "item-name";
+    name.textContent = item.name || item.title || "Product";
+
+    const size = document.createElement("div");
+    size.className = "item-size";
+    size.textContent = item.size ? "Size: " + item.size : "";
+
+    const priceText = document.createElement("div");
+    priceText.className = "item-price";
+    priceText.textContent = money(price) + " each";
+
+    const quantityBox = document.createElement("div");
+    quantityBox.className = "quantity";
+
+    const minus = document.createElement("button");
+    minus.textContent = "−";
+    minus.onclick = () => changeQuantity(index, -1);
+
+    const quantityText = document.createElement("span");
+    quantityText.textContent = quantity;
+
+    const plus = document.createElement("button");
+    plus.textContent = "+";
+    plus.onclick = () => changeQuantity(index, 1);
+
+    quantityBox.append(minus, quantityText, plus);
+    details.append(name, size, priceText, quantityBox);
+
+    const right = document.createElement("div");
+    right.className = "item-right";
+
+    const subtotalText = document.createElement("div");
+    subtotalText.className = "subtotal";
+    subtotalText.textContent = money(subtotal);
+
+    const remove = document.createElement("button");
+    remove.className = "remove-btn";
+    remove.textContent = "Remove";
+    remove.onclick = () => removeItem(index);
+
+    right.append(subtotalText, remove);
+    card.append(image, details, right);
+    container.appendChild(card);
+  });
+
+  document.getElementById("itemCount").textContent = count;
+  document.getElementById("subtotal").textContent = money(total);
+  document.getElementById("total").textContent = money(total);
+}
+
+function changeQuantity(index, amount) {
+  const cart = getCart();
+  if (!cart[index]) return;
+
+  const current = Number(cart[index].quantity || 1);
+  cart[index].quantity = Math.max(1, Math.min(99, current + amount));
+
+  saveCart(cart);
+  renderCart();
+}
+
+function removeItem(index) {
+  const cart = getCart();
+  cart.splice(index, 1);
+  saveCart(cart);
+  renderCart();
+}
+
+function proceedToCheckout() {
+  const cart = getCart();
+
+  if (!cart.length) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  window.location.href = "products.html?checkout=1";
+}
+
+renderCart();
+</script>
+
+</body>
+</html>

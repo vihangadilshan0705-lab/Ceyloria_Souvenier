@@ -1,0 +1,865 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ceyloria | Track Your Order</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #10243d;
+}
+
+header {
+  background: #10243d;
+  color: white;
+  padding: 22px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #d4ad58;
+  text-decoration: none;
+}
+
+header span {
+  font-size: 12px;
+  color: #ddd;
+  letter-spacing: 1px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 35px auto;
+  padding: 15px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.sub {
+  text-align: center;
+  color: #777;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 5px 25px #10243d12;
+  margin-bottom: 20px;
+}
+
+.search-title {
+  font-size: 19px;
+  margin: 0 0 8px;
+}
+
+.search-description {
+  color: #777;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 9px;
+  font-size: 15px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #d4ad58;
+}
+
+button {
+  background: #10243d;
+  color: white;
+  border: 0;
+  padding: 15px 25px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  width: 100%;
+  margin-top: 5px;
+}
+
+button:hover {
+  background: #d4ad58;
+  color: #10243d;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.message {
+  display: none;
+  padding: 14px;
+  border-radius: 9px;
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.error {
+  display: block;
+  background: #fff0f0;
+  color: #b42318;
+}
+
+.success {
+  display: block;
+  background: #edf8ef;
+  color: #26733b;
+}
+
+.tracking-card {
+  display: none;
+}
+
+.order-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.info-item {
+  background: #f7f8fa;
+  padding: 14px;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.info-item small {
+  display: block;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.info-item strong {
+  font-size: 14px;
+}
+
+.status {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.status h2 {
+  color: #10243d;
+  margin-bottom: 8px;
+}
+
+.status p {
+  color: #777;
+  line-height: 1.6;
+}
+
+.progress {
+  height: 9px;
+  background: #eee;
+  border-radius: 20px;
+  margin: 28px 0;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  width: 0;
+  background: #d4ad58;
+  border-radius: 20px;
+  transition: width .5s;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.step {
+  color: #aaa;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 9px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.step.active {
+  color: #b58a31;
+  font-weight: bold;
+}
+
+.step.active .step-icon {
+  background: #d4ad58;
+  color: #10243d;
+}
+
+.map {
+  height: 300px;
+  background: #e8eee9;
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 25px;
+}
+
+.park {
+  position: absolute;
+  background: #d1e5cf;
+  border-radius: 50%;
+}
+
+.park.one {
+  width: 150px;
+  height: 100px;
+  top: 5%;
+  left: 5%;
+}
+
+.park.two {
+  width: 160px;
+  height: 110px;
+  bottom: 0;
+  right: 5%;
+}
+
+.road {
+  position: absolute;
+  height: 13px;
+  background: white;
+  border: 1px solid #d5d9d4;
+  border-radius: 20px;
+  transform-origin: left center;
+}
+
+.road.one {
+  width: 120%;
+  top: 55%;
+  left: -5%;
+  transform: rotate(-17deg);
+}
+
+.road.two {
+  width: 100%;
+  top: 20%;
+  left: 10%;
+  transform: rotate(38deg);
+}
+
+.road.three {
+  width: 95%;
+  top: 85%;
+  left: 15%;
+  transform: rotate(-42deg);
+}
+
+.road.four {
+  width: 80%;
+  top: 10%;
+  left: 48%;
+  transform: rotate(90deg);
+}
+
+.road.five {
+  width: 90%;
+  top: 65%;
+  left: 30%;
+  transform: rotate(20deg);
+}
+
+.route {
+  position: absolute;
+  left: 12%;
+  top: 54%;
+  width: 75%;
+  border-top: 4px dashed #d4ad58;
+  transform: rotate(-17deg);
+}
+
+.map-pin {
+  position: absolute;
+  right: 13%;
+  top: 22%;
+  font-size: 32px;
+}
+
+.city {
+  position: absolute;
+  font-size: 12px;
+  font-weight: bold;
+  color: #526454;
+  background: #ffffffd9;
+  padding: 7px 10px;
+  border-radius: 7px;
+}
+
+.city.start {
+  left: 8%;
+  bottom: 17%;
+}
+
+.city.end {
+  right: 5%;
+  top: 10%;
+  color: #10243d;
+  max-width: 45%;
+  overflow-wrap: anywhere;
+}
+
+.map-label {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: white;
+  padding: 7px 11px;
+  border-radius: 7px;
+  font-size: 10px;
+  color: #666;
+}
+
+.address-box {
+  margin-top: 18px;
+  background: #f7f8fa;
+  border-left: 4px solid #d4ad58;
+  padding: 15px;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+.refresh {
+  text-align: center;
+  color: #999;
+  font-size: 11px;
+  margin-top: 18px;
+}
+
+footer {
+  text-align: center;
+  color: #999;
+  padding: 25px;
+  font-size: 12px;
+}
+
+@media(max-width:600px) {
+  header {
+    padding: 18px;
+  }
+
+  .logo {
+    font-size: 21px;
+  }
+
+  .container {
+    margin: 15px auto;
+  }
+
+  .card {
+    padding: 17px;
+  }
+
+  .steps {
+    gap: 3px;
+  }
+
+  .step {
+    font-size: 9px;
+  }
+
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+
+  .order-info {
+    grid-template-columns: 1fr;
+  }
+
+  .map {
+    height: 260px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <a href="/" class="logo">CEYLORIA</a>
+  <span>DELIVERY TRACKING</span>
+</header>
+
+<div class="container">
+
+  <h1>Track Your Order</h1>
+  <p class="sub">Follow your Ceyloria order delivery.</p>
+
+  <div class="card">
+
+    <h2 class="search-title">Find Your Order</h2>
+
+    <p class="search-description">
+      Enter your Ceyloria order number and the phone number
+      you provided when placing your order.
+    </p>
+
+    <form id="trackingForm">
+
+      <div class="form-group">
+        <label for="orderNumber">ORDER NUMBER</label>
+        <input
+          id="orderNumber"
+          type="text"
+          placeholder="Example: CEY-20261119-09CEAE"
+          required
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="phone">PHONE NUMBER</label>
+        <input
+          id="phone"
+          type="tel"
+          placeholder="Enter your order phone number"
+          required
+          autocomplete="tel"
+        >
+      </div>
+
+      <button type="submit" id="trackButton">
+        Track Order
+      </button>
+
+    </form>
+
+    <div id="message" class="message"></div>
+
+  </div>
+
+  <div class="card tracking-card" id="trackingCard">
+
+    <div class="order-info">
+
+      <div class="info-item">
+        <small>ORDER NUMBER</small>
+        <strong id="displayOrderNumber">-</strong>
+      </div>
+
+      <div class="info-item">
+        <small>ORDER DATE</small>
+        <strong id="orderDate">-</strong>
+      </div>
+
+    </div>
+
+    <div class="status">
+      <h2 id="statusTitle">Loading...</h2>
+      <p id="statusText">Please wait while we check your order.</p>
+    </div>
+
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <div class="steps">
+
+      <div class="step" id="s1">
+        <div class="step-icon">⌛</div>
+        Pending
+      </div>
+
+      <div class="step" id="s2">
+        <div class="step-icon">✓</div>
+        Order Confirmed
+      </div>
+
+      <div class="step" id="s3">
+        <div class="step-icon">📦</div>
+        Preparing
+      </div>
+
+      <div class="step" id="s4">
+        <div class="step-icon">🚚</div>
+        Dispatched
+      </div>
+
+      <div class="step" id="s5">
+        <div class="step-icon">📍</div>
+        On the Way
+      </div>
+
+      <div class="step" id="s6">
+        <div class="step-icon">✓</div>
+        Delivered
+      </div>
+
+    </div>
+
+    <div class="map">
+
+      <div class="park one"></div>
+      <div class="park two"></div>
+
+      <div class="road one"></div>
+      <div class="road two"></div>
+      <div class="road three"></div>
+      <div class="road four"></div>
+      <div class="road five"></div>
+
+      <div class="route"></div>
+
+      <div class="city start">
+        📍 CEYLORIA STORE
+      </div>
+
+      <div class="city end" id="mapDestination">
+        Delivery Address
+      </div>
+
+      <div class="map-pin">📍</div>
+
+      <div class="map-label">
+        CEYLORIA DELIVERY DESTINATION PREVIEW
+      </div>
+
+    </div>
+
+    <div class="address-box">
+      <strong>Delivery Address</strong>
+      <p id="deliveryAddress">-</p>
+    </div>
+
+    <div class="refresh" id="refreshTime">
+      Waiting for tracking information...
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  © 2026 Ceyloria Souvenirs | Made with ❤️ in Sri Lanka
+</footer>
+
+<script>
+const statuses = [
+  "Pending",
+  "Order Confirmed",
+  "Preparing",
+  "Dispatched",
+  "On the Way",
+  "Delivered"
+];
+
+const messages = [
+  "Your order has been received and is waiting for confirmation.",
+  "Your order has been successfully confirmed.",
+  "Your Ceyloria souvenirs are being prepared.",
+  "Your order has been dispatched.",
+  "Your order is on the way to your delivery address.",
+  "Your order has been successfully delivered. Thank you!"
+];
+
+let refreshTimer = null;
+let currentOrderNumber = "";
+let currentPhone = "";
+let lastTrackingData = null;
+
+const form = document.getElementById("trackingForm");
+const button = document.getElementById("trackButton");
+
+function showMessage(message, type) {
+  const box = document.getElementById("message");
+  box.textContent = message;
+  box.className = "message " + type;
+}
+
+function clearMessage() {
+  const box = document.getElementById("message");
+  box.textContent = "";
+  box.className = "message";
+}
+
+function updateTracking(data) {
+
+  lastTrackingData = data;
+
+  document.getElementById("trackingCard").style.display = "block";
+
+  document.getElementById("displayOrderNumber").textContent =
+    data.orderNumber || "-";
+
+  document.getElementById("orderDate").textContent =
+    data.createdAt
+      ? new Date(data.createdAt).toLocaleString()
+      : "-";
+
+  document.getElementById("deliveryAddress").textContent =
+    data.address || "Address not available";
+
+  document.getElementById("mapDestination").textContent =
+    data.address || "Delivery Destination";
+
+  const currentStatus = data.status || "Pending";
+  const index = statuses.indexOf(currentStatus);
+
+  document.getElementById("statusTitle").textContent =
+    currentStatus;
+
+  if (index >= 0) {
+
+    document.getElementById("statusText").textContent =
+      messages[index];
+
+    document.getElementById("bar").style.width =
+      ((index + 1) / statuses.length * 100) + "%";
+
+    for (let i = 1; i <= statuses.length; i++) {
+      document.getElementById("s" + i).classList.toggle(
+        "active",
+        i <= index + 1
+      );
+    }
+
+  } else {
+
+    document.getElementById("statusText").textContent =
+      "Please contact Ceyloria for more information about this order.";
+
+    document.getElementById("bar").style.width = "0%";
+
+    for (let i = 1; i <= statuses.length; i++) {
+      document.getElementById("s" + i).classList.remove("active");
+    }
+
+  }
+
+  document.getElementById("refreshTime").textContent =
+    "Last updated: " + new Date().toLocaleTimeString() +
+    " | Automatically refreshes every 10 seconds.";
+}
+
+async function fetchTracking(showErrors = true) {
+
+  if (!currentOrderNumber || !currentPhone) return;
+
+  try {
+
+    const response = await fetch("/api/track/order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      cache: "no-store",
+      body: JSON.stringify({
+        orderNumber: currentOrderNumber,
+        phone: currentPhone
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to find your order."
+      );
+    }
+
+    clearMessage();
+    updateTracking(data);
+
+    return true;
+
+  } catch (error) {
+
+    if (showErrors) {
+      document.getElementById("trackingCard").style.display = "none";
+
+      showMessage(
+        error.message || "Something went wrong. Please try again.",
+        "error"
+      );
+    }
+
+    return false;
+  }
+}
+
+form.addEventListener("submit", async function(event) {
+
+  event.preventDefault();
+
+  currentOrderNumber =
+    document.getElementById("orderNumber").value.trim().toUpperCase();
+
+  currentPhone =
+    document.getElementById("phone").value.trim();
+
+  if (!currentOrderNumber || !currentPhone) {
+    showMessage(
+      "Please enter your order number and phone number.",
+      "error"
+    );
+    return;
+  }
+
+  clearMessage();
+
+  button.disabled = true;
+  button.textContent = "Checking Order...";
+
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+
+  document.getElementById("trackingCard").style.display = "none";
+
+  const success = await fetchTracking(true);
+
+  button.disabled = false;
+  button.textContent = "Track Order";
+
+  if (success) {
+    showMessage(
+      "Your order details have been found successfully.",
+      "success"
+    );
+
+    refreshTimer = setInterval(function() {
+      fetchTracking(false);
+    }, 10000);
+  }
+});
+
+// ===============================
+// OLD PRIVATE TRACKING LINK SUPPORT
+// ===============================
+
+async function initializeTracking() {
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+
+  if (!token) return;
+
+  document.getElementById("orderNumber").disabled = true;
+  document.getElementById("phone").disabled = true;
+  button.disabled = true;
+
+  showMessage(
+    "Loading your private tracking link...",
+    "success"
+  );
+
+  try {
+
+    const response = await fetch(
+      "/api/track/" + encodeURIComponent(token),
+      { cache: "no-store" }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to find your order.");
+    }
+
+    document.getElementById("orderNumber").value =
+      data.orderNumber || "";
+
+    document.getElementById("orderNumber").disabled = false;
+    document.getElementById("phone").disabled = false;
+    button.disabled = false;
+
+    updateTracking(data);
+
+    currentOrderNumber = data.orderNumber || "";
+
+    showMessage(
+      "Your private tracking link has been opened successfully.",
+      "success"
+    );
+
+    if (refreshTimer) clearInterval(refreshTimer);
+
+    refreshTimer = setInterval(async function() {
+
+      const response = await fetch(
+        "/api/track/" + encodeURIComponent(token),
+        { cache: "no-store" }
+      );
+
+      if (!response.ok) return;
+
+      const latestData = await response.json();
+      updateTracking(latestData);
+
+    }, 10000);
+
+  } catch (error) {
+
+    document.getElementById("orderNumber").disabled = false;
+    document.getElementById("phone").disabled = false;
+    button.disabled = false;
+
+    showMessage(
+      error.message || "Unable to load tracking details.",
+      "error"
+    );
+  }
+}
+
+initializeTracking();
+</script>
+
+</body>
+</html>

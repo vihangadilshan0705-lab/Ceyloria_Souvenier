@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account | Ceyloria</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f3ee;
+  color:#172b43;
+}
+header{
+  background:#10243d;
+  color:white;
+  padding:22px 6%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:15px;
+}
+.logo{font-size:24px;font-weight:bold;letter-spacing:3px}
+header a{color:#e2c276;text-decoration:none}
+.container{max-width:1050px;margin:35px auto;padding:0 18px}
+h1{margin-bottom:6px}
+.subtitle{color:#687586;margin-top:0}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1.3fr;
+  gap:22px;
+  align-items:start;
+}
+.card{
+  background:white;
+  border-radius:13px;
+  padding:25px;
+  box-shadow:0 5px 22px #10243d12;
+  margin-bottom:22px;
+}
+.card h2{margin-top:0;font-size:20px}
+label{display:block;font-weight:bold;font-size:13px;margin:15px 0 7px}
+input,textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #d5dbe2;
+  border-radius:7px;
+  font-size:15px;
+  font-family:inherit;
+}
+input:focus,textarea:focus{outline:2px solid #d4ad58}
+input[readonly]{background:#f0f1f3;color:#687586}
+textarea{min-height:85px;resize:vertical}
+button,.track-btn{
+  display:inline-block;
+  border:0;
+  border-radius:7px;
+  background:#10243d;
+  color:white;
+  padding:12px 18px;
+  cursor:pointer;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:bold;
+  margin-top:17px;
+}
+button:hover,.track-btn:hover{background:#254566}
+button:disabled{opacity:.6;cursor:not-allowed}
+.logout{background:#9b3434}
+.logout:hover{background:#762525}
+.order{
+  border:1px solid #e3e6e9;
+  border-radius:10px;
+  padding:17px;
+  margin-top:15px;
+}
+.order-top{
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.order-number{font-weight:bold}
+.status{
+  color:#946b18;
+  background:#fff4d8;
+  padding:6px 10px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+}
+.order p{font-size:14px;color:#596575;line-height:1.6}
+.track-btn{margin-top:5px;background:#b58a36;color:#fff}
+.message{font-size:14px;margin-top:12px}
+.error{color:#b3261e}
+.success{color:#167344}
+.empty{color:#687586;text-align:center;padding:25px 5px}
+.login-area{text-align:center;padding:25px 10px}
+footer{text-align:center;padding:25px;color:#78818c;font-size:13px}
+@media(max-width:750px){
+  .grid{grid-template-columns:1fr}
+  .container{margin-top:22px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">CEYLORIA</div>
+  <a href="/">Back to Store</a>
+</header>
+
+<div class="container">
+  <h1>My Account</h1>
+  <p class="subtitle">Manage your profile and view your Ceyloria orders.</p>
+
+  <div id="pageMessage" class="message"></div>
+
+  <div id="loginArea" class="card login-area" style="display:none">
+    <h2>Sign in to your Ceyloria Account</h2>
+    <p class="subtitle">Please log in or create an account to view your profile and orders.</p>
+    <a class="track-btn" href="/login.html">REGISTER / LOG IN</a>
+  </div>
+
+  <div class="grid" id="accountContent" style="display:none">
+
+    <section class="card">
+      <h2>My Profile</h2>
+
+      <form id="profileForm">
+        <label for="name">Full Name</label>
+        <input id="name" required>
+
+        <label for="phone">Phone Number</label>
+        <input id="phone" required>
+
+        <label for="email">Email Address</label>
+        <input id="email" type="email" readonly>
+
+        <label for="address">Delivery Address</label>
+        <textarea id="address" required></textarea>
+
+        <button type="submit" id="saveButton">Save Changes</button>
+      </form>
+
+      <button class="logout" id="logoutButton" type="button">Logout</button>
+      <div id="profileMessage" class="message"></div>
+    </section>
+
+    <section class="card">
+      <h2>My Orders</h2>
+      <p class="subtitle">Your previous and current orders.</p>
+      <div id="orders">Loading your orders...</div>
+    </section>
+
+  </div>
+</div>
+
+<footer>© 2026 Ceyloria Souvenirs | Made with ❤️ in Sri Lanka</footer>
+
+<script>
+const pageMessage = document.getElementById('pageMessage');
+const profileMessage = document.getElementById('profileMessage');
+const ordersBox = document.getElementById('orders');
+
+function showMessage(element, message, type) {
+  element.textContent = message;
+  element.className = 'message ' + (type || '');
+}
+
+function safeText(value) {
+  return String(value ?? '');
+}
+
+async function loadAccount() {
+  try {
+    const response = await fetch('/api/auth/me', {
+      credentials: 'same-origin'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.loggedIn || !data.customer) {
+      document.getElementById('loginArea').style.display = 'block';
+      document.getElementById('accountContent').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('loginArea').style.display = 'none';
+    document.getElementById('accountContent').style.display = 'grid';
+
+    const customer = data.customer;
+
+    document.getElementById('name').value = safeText(customer.name);
+    document.getElementById('phone').value = safeText(customer.phone);
+    document.getElementById('email').value = safeText(customer.email);
+    document.getElementById('address').value = safeText(customer.address);
+
+    await loadOrders();
+
+  } catch (error) {
+    pageMessage.textContent = 'Could not connect to the server. Please try again.';
+  }
+}
+
+async function loadOrders() {
+  try {
+    const response = await fetch('/api/account/orders', {
+      credentials: 'same-origin'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      ordersBox.textContent = data.message || 'Could not load orders.';
+      return;
+    }
+
+    if (!data.orders || data.orders.length === 0) {
+      ordersBox.innerHTML = '<p class="empty">You have not placed any orders yet.</p>';
+      return;
+    }
+
+    ordersBox.innerHTML = '';
+
+    data.orders.forEach(order => {
+      const card = document.createElement('div');
+      card.className = 'order';
+
+      const top = document.createElement('div');
+      top.className = 'order-top';
+
+      const number = document.createElement('span');
+      number.className = 'order-number';
+      number.textContent = order.orderNumber || 'Ceyloria Order';
+
+      const status = document.createElement('span');
+      status.className = 'status';
+      status.textContent = order.status || 'Order Confirmed';
+
+      top.append(number, status);
+      card.appendChild(top);
+
+      const details = document.createElement('p');
+      details.textContent =
+        'Order Date: ' + (order.date || 'Not available') +
+        '\nTotal: LKR ' + Number(order.total || 0).toLocaleString('en-LK') +
+        '\nDelivery Address: ' + (order.address || 'Not available');
+
+      details.style.whiteSpace = 'pre-line';
+      card.appendChild(details);
+
+      const items = document.createElement('p');
+      items.textContent = 'Items: ' + (
+        Array.isArray(order.items)
+          ? order.items.map(item => {
+              if (typeof item === 'string') return item;
+
+              return (item.name || item.title || item.id || 'Product') +
+                (item.quantity ? ' × ' + item.quantity : '');
+            }).join(', ')
+          : 'Order items'
+      );
+
+      card.appendChild(items);
+
+      if (order.invoiceUrl) {
+        const invoiceLink = document.createElement('a');
+        invoiceLink.className = 'track-btn';
+        invoiceLink.href = order.invoiceUrl;
+        invoiceLink.target = '_blank';
+        invoiceLink.rel = 'noopener';
+        invoiceLink.textContent = 'View Invoice';
+        invoiceLink.style.marginRight = '8px';
+        card.appendChild(invoiceLink);
+      }
+
+      if (order.trackingUrl) {
+        const link = document.createElement('a');
+        link.className = 'track-btn';
+        link.href = order.trackingUrl;
+        link.textContent = 'Track Order';
+        card.appendChild(link);
+      }
+
+      ordersBox.appendChild(card);
+    });
+
+  } catch (error) {
+    ordersBox.textContent = 'Could not load your orders. Please refresh the page.';
+  }
+}
+
+document.getElementById('profileForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
+
+  const button = document.getElementById('saveButton');
+  button.disabled = true;
+  button.textContent = 'Saving...';
+
+  try {
+    const response = await fetch('/api/account/profile', {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      showMessage(profileMessage, 'Profile updated successfully!', 'success');
+    } else {
+      showMessage(profileMessage, data.message || 'Could not update profile.', 'error');
+    }
+
+  } catch (error) {
+    showMessage(profileMessage, 'Server connection error.', 'error');
+  }
+
+  button.disabled = false;
+  button.textContent = 'Save Changes';
+});
+
+document.getElementById('logoutButton').addEventListener('click', async function() {
+  const button = this;
+  button.disabled = true;
+
+  try {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'same-origin'
+    });
+
+    if (response.ok) {
+      window.location.href = '/';
+    } else {
+      button.disabled = false;
+      showMessage(profileMessage, 'Could not logout. Please try again.', 'error');
+    }
+
+  } catch (error) {
+    button.disabled = false;
+    showMessage(profileMessage, 'Could not logout. Please try again.', 'error');
+  }
+});
+
+loadAccount();
+</script>
+
+</body>
+</html>

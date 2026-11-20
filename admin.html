@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ceyloria Admin Dashboard</title>
+<style>
+:root{--navy:#10243d;--navy2:#183654;--gold:#d4ad58;--gold-light:#f4e8c9;--bg:#f4f5f8;--white:#fff;--text:#26364a;--muted:#8490a0;--border:#e8ebf0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+.hidden{display:none!important}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:255px;background:var(--navy);color:white;position:fixed;inset:0 auto 0 0;padding:27px 17px;display:flex;flex-direction:column;z-index:10;overflow-y:auto}
+.brand{padding:5px 13px 27px;border-bottom:1px solid #ffffff20}
+.brand h1{font-family:Georgia,serif;font-size:27px;letter-spacing:2px;margin:0;color:white}
+.brand span{color:var(--gold);font-size:12px;letter-spacing:4px}
+.menu-title{font-size:10px;color:#8294aa;letter-spacing:2px;padding:26px 13px 12px}
+.nav-btn{width:100%;display:flex;align-items:center;gap:13px;padding:13px 15px;border:0;border-radius:8px;color:#c4cfdb;background:transparent;text-align:left;cursor:pointer;margin:3px 0;font-size:13px}
+.nav-btn:hover{background:#ffffff12;color:white}
+.nav-btn.active{background:#d4ad5820;color:var(--gold);font-weight:bold}
+.nav-icon{width:22px;text-align:center;font-size:17px}
+.sidebar-bottom{margin-top:auto;padding:15px 12px;color:#91a0b2;font-size:12px;line-height:1.8}
+.logout-btn{border:1px solid #ffffff35;background:transparent;color:white;width:100%;padding:12px;border-radius:7px;cursor:pointer;margin-top:10px}
+.main{margin-left:255px;width:calc(100% - 255px);padding:28px 34px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:28px}
+.page-title h2{font-size:25px;margin:0;color:var(--navy)}
+.page-title p{font-size:13px;color:var(--muted);margin:7px 0 0}
+.admin-profile{display:flex;align-items:center;gap:12px;background:white;padding:9px 15px;border-radius:10px;border:1px solid var(--border)}
+.avatar{width:36px;height:36px;background:var(--navy);color:var(--gold);display:grid;place-items:center;border-radius:50%;font-weight:bold;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.admin-profile small{color:var(--muted);display:block;margin-top:3px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px;margin-bottom:23px}
+.stat-card{background:white;border:1px solid var(--border);border-radius:12px;padding:21px;box-shadow:0 3px 12px #172b4206}
+.stat-top{display:flex;align-items:center;justify-content:space-between}
+.stat-label{font-size:12px;color:var(--muted);font-weight:bold;letter-spacing:.5px}
+.stat-icon{width:39px;height:39px;display:grid;place-items:center;border-radius:10px;background:var(--gold-light);color:#98701e;font-size:17px}
+.stat-value{font-size:25px;font-weight:bold;color:var(--navy);margin-top:16px}
+.stat-note{font-size:11px;color:var(--muted);margin-top:7px}
+.panel{background:white;border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:0 3px 12px #172b4206}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.panel-head h3{margin:0;color:var(--navy);font-size:16px}
+.panel-head p{font-size:12px;color:var(--muted);margin:6px 0 0}
+.search{padding:10px 13px;border:1px solid var(--border);border-radius:7px;outline:none;min-width:210px}
+.search:focus,.field-control:focus{border-color:var(--gold);outline:none}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th{text-align:left;padding:13px 12px;background:#f7f8fa;color:#738095;font-size:10px;letter-spacing:.7px}
+td{padding:14px 12px;border-bottom:1px solid var(--border);font-size:12px;line-height:1.6;vertical-align:top}
+tr:last-child td{border-bottom:0}
+.muted{color:var(--muted)}
+.status-select{padding:7px 9px;border:1px solid var(--border);border-radius:6px;background:white;color:var(--text);font-size:11px;max-width:150px}
+a{color:#98701e;text-decoration:none;font-weight:bold}
+a:hover{text-decoration:underline}
+.badge{display:inline-block;border-radius:20px;padding:4px 9px;background:#f2f3f5;color:#657386;font-size:10px;font-weight:bold}
+.gold-badge{background:var(--gold-light);color:#8a671f}
+.btn{background:var(--navy);color:white;border:0;padding:10px 15px;border-radius:7px;cursor:pointer;font-weight:bold;font-size:12px}
+.btn:hover{background:var(--navy2)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-gold{background:#b58b3d;color:white}
+.btn-light{background:#eef1f5;color:var(--navy)}
+.delete-btn{background:#b83232;color:white;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:bold}
+.delete-btn:hover{background:#922626}
+.small-btn{padding:7px 10px;font-size:11px}
+.empty{text-align:center;padding:35px;color:var(--muted)}
+.chart-area{height:240px;display:flex;align-items:flex-end;gap:15px;padding:15px 8px 0;border-bottom:1px solid var(--border)}
+.chart-column{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:8px;min-width:0}
+.chart-bar{width:min(42px,75%);min-height:3px;background:linear-gradient(180deg,#dfbd70,#a77c2d);border-radius:6px 6px 0 0;transition:height .3s}
+.chart-month{font-size:10px;color:var(--muted)}
+.chart-amount{font-size:10px;color:var(--navy);font-weight:bold}
+.chart-caption{font-size:11px;color:var(--muted);margin-top:12px}
+.login-page{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#10243d,#203e5a)}
+.login-card{background:white;width:100%;max-width:410px;padding:38px;border-radius:15px;box-shadow:0 20px 60px #0003}
+.login-brand{text-align:center;margin-bottom:28px}
+.login-brand h1{font:bold 34px Georgia;color:var(--navy);margin:0}
+.login-brand span{color:#a77c2d;letter-spacing:5px;font-size:12px}
+.login-card h2{color:var(--navy);font-size:20px}
+.field{margin:17px 0}
+.field label{display:block;font-size:11px;font-weight:bold;color:#68778a;margin-bottom:8px}
+.field input{width:100%;padding:13px;border:1px solid var(--border);border-radius:7px;outline:none}
+.login-card .btn{width:100%;padding:13px;margin-top:8px}
+.error{color:#b33;font-size:12px;margin-top:12px}
+.mobile-menu{display:none;background:var(--navy);color:white;border:0;padding:10px 13px;border-radius:7px}
+.track-link{display:inline-block;background:#f4e8c9;color:#765619;padding:7px 9px;border-radius:6px;font-size:10px;margin-top:5px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:15px}
+.product-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:white}
+.product-card img{width:100%;height:175px;object-fit:cover;background:#f1f2f4}
+.product-card-body{padding:14px}
+.product-card h4{margin:0 0 7px;color:var(--navy);font-size:14px}
+.product-card p{font-size:12px;color:var(--muted);margin:5px 0}
+.product-actions{display:flex;gap:7px;margin-top:13px}
+.product-actions button{flex:1}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.form-field{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}
+.form-field label{font-size:11px;font-weight:bold;color:#68778a}
+.field-control{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:7px;background:white;color:var(--text)}
+textarea.field-control{min-height:90px;resize:vertical}
+.full-width{grid-column:1/-1}
+.image-preview-grid{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.image-preview{width:115px;position:relative;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#f5f5f5}
+.image-preview img{width:115px;height:100px;object-fit:cover;display:block}
+.image-preview button{width:100%;border:0;background:#b83232;color:white;padding:6px;font-size:10px;cursor:pointer}
+.image-preview small{display:block;padding:5px;text-align:center;color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+.form-help{font-size:11px;color:var(--muted);line-height:1.5}
+.notice{padding:12px;border-radius:7px;background:#f4e8c9;color:#765619;font-size:12px;margin-bottom:15px}
+.size-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;margin-bottom:10px}
+.size-remove{background:#b83232;color:white;border:0;padding:11px 13px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:bold}
+.size-header{display:grid;grid-template-columns:1fr 1fr 82px;gap:10px;margin-bottom:8px;color:#68778a;font-size:10px;font-weight:bold}
+.category-main-card{border:1px solid var(--border);border-radius:9px;margin:12px 0;overflow:hidden}
+.category-main-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f7f8fa;padding:14px}
+.category-sub-list{padding:4px 14px 10px 28px}
+.category-child-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 8px;border-bottom:1px solid var(--border);font-size:12px}
+.category-parent-label{font-size:10px;color:var(--muted);font-weight:bold;letter-spacing:.5px}
+.drop-zone{border:2px dashed #cbd2dc;border-radius:10px;padding:25px;text-align:center;color:#68778a;background:#fafbfc;cursor:pointer;transition:.2s}
+.drop-zone.dragover{border-color:var(--gold);background:#fff9e9}
+.drop-zone b{display:block;color:var(--navy);margin-bottom:6px}
+.product-status-active{background:#e6f5eb;color:#237342}
+.product-status-inactive{background:#fceaea;color:#a12d2d}
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;flex-wrap:wrap}
+.pagination button{border:1px solid var(--border);background:white;padding:8px 12px;border-radius:6px;cursor:pointer}
+.pagination button.active{background:var(--navy);color:white}
+
+/* STAFF MANAGEMENT */
+.staff-avatar{width:42px;height:42px;border-radius:50%;background:var(--navy);color:var(--gold);display:grid;place-items:center;font-weight:bold;overflow:hidden}
+.staff-avatar img{width:100%;height:100%;object-fit:cover}
+.permission-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.permission-item{display:flex;align-items:flex-start;gap:10px;padding:13px;border:1px solid var(--border);border-radius:8px;font-size:12px}
+.permission-item input{margin-top:2px;accent-color:var(--navy)}
+.permission-item b{display:block;color:var(--navy);margin-bottom:4px}
+.permission-item small{color:var(--muted);line-height:1.4}
+.staff-form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.profile-photo{width:90px;height:90px;border-radius:50%;object-fit:cover;background:#eee;border:2px solid var(--border)}
+.position-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-bottom:1px solid var(--border);font-size:13px}
+.profile-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:750px){.sidebar{transform:translateX(-100%);transition:.25s}.sidebar.open{transform:translateX(0)}.main{margin-left:0;width:100%;padding:18px}.mobile-menu{display:block}.topbar{align-items:flex-start}.admin-profile{display:none}.form-grid{grid-template-columns:1fr}.full-width{grid-column:auto}.permission-grid{grid-template-columns:1fr}}
+@media(max-width:500px){.size-row{grid-template-columns:1fr 1fr}.size-remove{grid-column:1/-1}.size-header{grid-template-columns:1fr 1fr 82px}}
+@media(max-width:430px){.stats{grid-template-columns:1fr 1fr;gap:9px}.stat-card{padding:14px}.stat-value{font-size:19px}.panel{padding:14px}}
+
+/* Order details popup */
+.modal-backdrop{position:fixed;inset:0;background:rgba(8,20,35,.68);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.modal-backdrop.hidden{display:none}
+.order-modal{width:min(900px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 24px 80px #0005}
+.order-modal-head{position:sticky;top:0;background:#10243d;color:#fff;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:2}
+.order-modal-head h3{margin:0;color:#fff}
+.order-modal-close{border:0;background:transparent;color:#fff;font-size:28px;cursor:pointer;line-height:1}
+.order-modal-body{padding:22px}
+.order-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:20px}
+.order-info-card{background:#f6f7f9;border:1px solid #e7e9ed;border-radius:10px;padding:12px;overflow-wrap:anywhere}
+.order-info-card small{display:block;color:#687386;margin-bottom:5px}
+.order-item-card{display:grid;grid-template-columns:86px minmax(0,1fr) auto;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid #e8ebef}
+.order-item-card img{width:86px;height:86px;object-fit:cover;border-radius:10px;background:#f0f1f3}
+.order-item-card h4{margin:0 0 6px;color:#10243d}
+.order-item-meta{font-size:13px;color:#647084;line-height:1.65}
+.order-modal-total{display:flex;justify-content:flex-end;gap:18px;font-size:18px;font-weight:700;padding-top:18px}
+.order-row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.order-row-actions .btn,.order-row-actions .delete-btn{white-space:nowrap}
+@media(max-width:600px){.order-item-card{grid-template-columns:64px minmax(0,1fr)}.order-item-card img{width:64px;height:64px}.order-item-price{grid-column:2}.order-modal-body{padding:14px}}
+</style>
+</head>
+<body>
+
+<div id="loginPage" class="login-page">
+ <div class="login-card">
+  <div class="login-brand"><h1>CEYLORIA</h1><span>SOUVENIRS</span></div>
+  <h2>Admin Login</h2>
+  <p class="muted">Sign in to manage your store.</p>
+  <form id="loginForm">
+   <div class="field"><label>USERNAME</label><input id="username" required autocomplete="username" placeholder="Enter username"></div>
+   <div class="field"><label>PASSWORD</label><input id="password" type="password" required autocomplete="current-password" placeholder="Enter password"></div>
+   <button class="btn" type="submit">LOGIN TO DASHBOARD</button>
+   <p id="loginError" class="error"></p>
+  </form>
+ </div>
+</div>
+
+<div id="adminApp" class="layout hidden">
+ <aside class="sidebar" id="sidebar">
+  <div class="brand"><h1>CEYLORIA</h1><span>SOUVENIRS</span></div>
+  <div class="menu-title">MAIN MENU</div>
+  <button class="nav-btn" data-page="dashboard" data-permission="dashboard"><span class="nav-icon">⌂</span> Dashboard</button>
+  <button class="nav-btn" data-page="orders" data-permission="orders"><span class="nav-icon">▣</span> Orders</button>
+  <button class="nav-btn" data-page="customers" data-permission="customers"><span class="nav-icon">♙</span> Customers</button>
+  <button class="nav-btn" data-page="analytics" data-permission="dashboard"><span class="nav-icon">▥</span> Sales Analytics</button>
+  <div class="menu-title" data-menu-permission="products">PRODUCT MANAGEMENT</div>
+  <button class="nav-btn" data-page="products" data-permission="products"><span class="nav-icon">▧</span> Manage Products</button>
+  <button class="nav-btn" data-page="categories" data-permission="products"><span class="nav-icon">▤</span> Manage Categories</button>
+  <button class="nav-btn" data-page="addProduct" data-permission="products"><span class="nav-icon">＋</span> Add New Product</button>
+  <div class="menu-title" data-chairman-only>ADMINISTRATION</div>
+  <button class="nav-btn" data-page="staff" data-chairman-only><span class="nav-icon">♧</span> Staff Management</button>
+  <div class="menu-title">ACCOUNT</div>
+  <button class="nav-btn" data-page="profile"><span class="nav-icon">♙</span> My Profile</button>
+  <div class="sidebar-bottom">Ceyloria Souvenirs<br>Bandaragama, Sri Lanka<button class="logout-btn" id="logoutBtn">↪ &nbsp; LOG OUT</button></div>
+ </aside>
+
+ <main class="main">
+  <header class="topbar">
+   <div style="display:flex;align-items:center;gap:13px">
+    <button class="mobile-menu" id="mobileMenu">☰</button>
+    <div class="page-title"><h2 id="pageHeading">Dashboard</h2><p id="pageSubheading">Welcome to your Ceyloria store management.</p></div>
+   </div>
+   <div class="admin-profile">
+    <div class="avatar" id="headerAvatar">C</div>
+    <div><b id="headerName">Admin</b><small id="headerPosition">Administrator</small></div>
+   </div>
+  </header>
+
+  <section id="page-dashboard" class="page-section hidden" data-page-permission="dashboard">
+   <div class="stats">
+    <div class="stat-card"><div class="stat-top"><span class="stat-label">TOTAL ORDERS</span><span class="stat-icon">▣</span></div><div class="stat-value" id="total">0</div><div class="stat-note">All received orders</div></div>
+    <div class="stat-card"><div class="stat-top"><span class="stat-label">CUSTOMERS</span><span class="stat-icon">♙</span></div><div class="stat-value" id="customerCount">0</div><div class="stat-note">Registered accounts</div></div>
+    <div class="stat-card"><div class="stat-top"><span class="stat-label">ORDER VALUE</span><span class="stat-icon">LKR</span></div><div class="stat-value" id="sales">LKR 0</div><div class="stat-note">Excluding cancelled orders</div></div>
+    <div class="stat-card"><div class="stat-top"><span class="stat-label">PENDING ORDERS</span><span class="stat-icon">◷</span></div><div class="stat-value" id="pending">0</div><div class="stat-note">Orders awaiting action</div></div>
+   </div>
+   <div class="panel"><div class="panel-head"><div><h3>Sales Overview</h3><p>Monthly order value from your store</p></div><span class="badge gold-badge">LAST 6 MONTHS</span></div><div id="dashboardChart" class="chart-area"></div><div class="chart-caption">Values calculated from saved website orders, excluding cancelled orders.</div></div>
+   <div class="panel"><div class="panel-head"><div><h3>Recent Orders</h3><p>Your latest customer orders</p></div><button class="btn" data-goto="orders">VIEW ALL ORDERS →</button></div><div class="table-wrap"><table><thead><tr><th>ORDER NUMBER</th><th>CUSTOMER</th><th>DATE</th><th>TOTAL</th><th>STATUS</th></tr></thead><tbody id="recentOrders"><tr><td colspan="5" class="empty">Loading orders...</td></tr></tbody></table></div></div>
+  </section>
+
+  <section id="page-orders" class="page-section hidden" data-page-permission="orders">
+   <div class="panel"><div class="panel-head"><div><h3>Customer Orders</h3><p>Update order progress and open the customer's tracking page.</p></div><input class="search" id="orderSearch" placeholder="Search orders or customers..."></div>
+    <div class="table-wrap"><table><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th><th>EMAIL</th><th>TRACKING / INVOICE</th><th>ACTION</th></tr></thead><tbody id="orders"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody></table></div>
+   </div>
+  </section>
+
+  <section id="page-customers" class="page-section hidden" data-page-permission="customers">
+   <div class="panel"><div class="panel-head"><div><h3>Registered Customers</h3><p>Delete individual customer accounts. Their orders will remain.</p></div><input class="search" id="customerSearch" placeholder="Search customers..."></div>
+    <div class="table-wrap"><table><thead><tr><th>CUSTOMER</th><th>CONTACT</th><th>ADDRESS</th><th>REGISTERED</th><th>EMAIL NOTIFICATIONS</th><th>ORDERS</th><th>ORDER VALUE</th><th>ACTION</th></tr></thead><tbody id="customers"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody></table></div>
+   </div>
+  </section>
+
+  <section id="page-analytics" class="page-section hidden" data-page-permission="dashboard">
+   <div class="stats">
+    <div class="stat-card"><div class="stat-label">TOTAL SALES VALUE</div><div class="stat-value" id="analyticsSales">LKR 0</div><div class="stat-note">Excluding cancelled orders</div></div>
+    <div class="stat-card"><div class="stat-label">TOTAL ORDERS</div><div class="stat-value" id="analyticsOrders">0</div><div class="stat-note">All received orders</div></div>
+   </div>
+   <div class="panel"><div class="panel-head"><div><h3>Monthly Sales Analytics</h3><p>Sales based on saved orders.</p></div><span class="badge gold-badge">LKR</span></div><div id="analyticsChart" class="chart-area"></div><div class="chart-caption">Chart uses actual order records stored in your Ceyloria database.</div></div>
+  </section>
+
+  <section id="page-products" class="page-section hidden" data-page-permission="products">
+   <div class="panel">
+    <div class="panel-head"><div><h3>Manage Products</h3><p>View, search, edit and delete your store products.</p></div><button class="btn btn-gold" id="goAddProduct">+ ADD NEW PRODUCT</button></div>
+    <div class="notice">Products added here are saved in your Ceyloria database.</div>
+    <div class="panel-head"><input class="search" id="productSearch" placeholder="Search products..."><select class="field-control" id="productCategoryFilter" style="max-width:250px"><option value="">All Main Categories</option></select></div>
+    <div id="productList" class="product-grid"><div class="empty">Loading products...</div></div><div id="productPagination" class="pagination"></div>
+   </div>
+  </section>
+
+  <section id="page-categories" class="page-section hidden" data-page-permission="products">
+   <div class="panel">
+    <div class="panel-head"><div><h3>Manage Categories</h3><p>Create Main Categories and Subcategories separately.</p></div></div>
+    <form id="categoryForm"><div class="form-grid">
+     <div class="form-field"><label for="newCategoryName">CATEGORY NAME *</label><input class="field-control" id="newCategoryName" placeholder="Example: Traditional Mask" required></div>
+     <div class="form-field"><label for="newCategoryParent">CATEGORY TYPE</label><select class="field-control" id="newCategoryParent"><option value="">Main Category</option></select><span class="form-help">Main Category select nokaloth Main Category ekak hadenawa. Parent category ekak select kaloth Subcategory ekak hadenawa.</span></div>
+    </div><button class="btn btn-gold" type="submit">+ ADD CATEGORY</button></form>
+   </div>
+   <div class="panel"><div class="panel-head"><div><h3>Your Categories</h3><p>Main Categories and their Subcategories.</p></div></div><div id="categoryList"><div class="empty">Loading categories...</div></div></div>
+  </section>
+
+  <section id="page-addProduct" class="page-section hidden" data-page-permission="products">
+   <div class="panel">
+    <div class="panel-head"><div><h3 id="editorTitle">Add New Product</h3><p>Add product details, prices, stock and photos.</p></div><button class="btn btn-light" id="resetProductBtn" type="button">CLEAR FORM</button></div>
+    <div class="notice">Product photos 8k dakwa add karanna puluwan. Hama image ekakma 5MB walata adu wenna one.</div>
+    <form id="productForm">
+     <input type="hidden" id="editProductId">
+     <div class="form-grid">
+      <div class="form-field"><label for="productName">PRODUCT NAME *</label><input class="field-control" id="productName" required placeholder="Example: Traditional Fire Mask"></div>
+      <div class="form-field"><label for="productMainCategory">MAIN CATEGORY *</label><select class="field-control" id="productMainCategory" required><option value="">Select main category</option></select></div>
+      <div class="form-field"><label for="productCategory">SUBCATEGORY *</label><select class="field-control" id="productCategory" required disabled><option value="">Select main category first</option></select><span class="form-help">Palamuw Main Category eka select karanna. Eeta passe e category eke Subcategories penwai.</span></div>
+      <div class="form-field"><label for="productPrice">DEFAULT PRICE (LKR) *</label><input class="field-control" id="productPrice" type="number" min="0" step="0.01" placeholder="3800" required><span class="form-help">Size prices use karanne nathnam me price eka use wenawa.</span></div>
+      <div class="form-field"><label for="productDiscountPrice">DISCOUNT PRICE (LKR)</label><input class="field-control" id="productDiscountPrice" type="number" min="0" step="0.01" placeholder="Optional"></div>
+      <div class="form-field"><label for="productMaterial">MATERIAL</label><input class="field-control" id="productMaterial" maxlength="160" placeholder="Example: Wood, Clay, Coconut Shell"></div>
+      <div class="form-field"><label for="productStock">STOCK QUANTITY *</label><input class="field-control" id="productStock" type="number" min="0" step="1" value="0" required></div>
+      <div class="form-field"><label for="productStatus">PRODUCT STATUS *</label><select class="field-control" id="productStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+      <div class="form-field full-width"><label for="productDescription">PRODUCT DESCRIPTION</label><textarea class="field-control" id="productDescription" placeholder="Enter product description..."></textarea></div>
+      <div class="form-field full-width"><label>SIZE OPTIONS & PRICES</label><div class="size-header"><span>SIZE NAME</span><span>PRICE (LKR)</span><span></span></div><div id="sizeRows"></div><div style="margin-top:8px"><button class="btn btn-light" type="button" id="addSizeBtn">+ ADD SIZE</button></div><span class="form-help">Udaharanayak: 6", 8", Medium, Large. Hama size ekakatama wenama price ekak denna.</span></div>
+      <div class="form-field full-width"><label>PRODUCT PHOTOS</label><div class="drop-zone" id="dropZone"><b>Drag & Drop Product Photos Here</b><span>or click below to choose images</span><div style="margin-top:13px"><button class="btn btn-light" type="button" id="chooseImagesBtn">CHOOSE PHOTOS</button></div><input id="productImages" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden></div><span class="form-help">Maximum 8 images. Each image must be smaller than 5MB. JPG, PNG, WEBP and GIF supported.</span><div id="imagePreview" class="image-preview-grid"></div></div>
+     </div>
+     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="btn btn-gold" id="saveProductBtn" type="submit">SAVE PRODUCT</button><button class="btn btn-light" id="cancelProductBtn" type="button">CANCEL</button></div>
+     <p id="productFormMessage" class="error"></p>
+    </form>
+   </div>
+  </section>
+
+  <!-- STAFF MANAGEMENT -->
+  <section id="page-staff" class="page-section hidden">
+   <div class="panel">
+    <div class="panel-head"><div><h3>Staff Management</h3><p>Create staff accounts and control what each staff member can access.</p></div><button class="btn btn-gold" id="newStaffBtn">+ ADD NEW STAFF</button></div>
+    <div class="notice">Chairman account has full access. Staff members can only access the sections assigned to them.</div>
+    <div class="table-wrap"><table><thead><tr><th>STAFF MEMBER</th><th>USERNAME</th><th>POSITION</th><th>PERMISSIONS</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody id="staffTable"><tr><td colspan="6" class="empty">Loading staff...</td></tr></tbody></table></div>
+   </div>
+
+   <div class="panel hidden" id="staffEditorPanel">
+    <div class="panel-head"><div><h3 id="staffEditorTitle">Add Staff Member</h3><p>Create or update a staff account.</p></div></div>
+    <form id="staffForm">
+     <input type="hidden" id="staffEditId">
+     <div class="form-grid">
+      <div class="form-field"><label>FULL NAME *</label><input class="field-control" id="staffFullName" required maxlength="120"></div>
+      <div class="form-field"><label>USERNAME *</label><input class="field-control" id="staffUsername" required maxlength="60" autocomplete="off"></div>
+      <div class="form-field"><label>EMAIL</label><input class="field-control" id="staffEmail" type="email"></div>
+      <div class="form-field"><label>PHONE</label><input class="field-control" id="staffPhone" maxlength="30"></div>
+      <div class="form-field"><label>POSITION *</label><select class="field-control" id="staffPosition" required></select></div>
+      <div class="form-field" id="staffPasswordField"><label>INITIAL PASSWORD *</label><input class="field-control" id="staffPassword" type="password" minlength="6" autocomplete="new-password"><span class="form-help">Password eka create karana welawata witharai enter karanne. Password eka passe balanna ba.</span></div>
+      <div class="form-field"><label>ACCOUNT STATUS</label><select class="field-control" id="staffActive"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+      <div class="form-field"><label>PROFILE PHOTO (OPTIONAL)</label><input class="field-control" id="staffPhoto" type="file" accept="image/jpeg,image/png,image/webp"><span class="form-help">JPG, PNG or WEBP. Maximum 2MB.</span></div>
+      <div class="form-field full-width"><label>ACCESS PERMISSIONS *</label><div class="permission-grid">
+       <label class="permission-item"><input type="checkbox" class="staff-permission" value="dashboard"><span><b>Dashboard & Reports</b><small>View dashboard statistics and sales analytics.</small></span></label>
+       <label class="permission-item"><input type="checkbox" class="staff-permission" value="products"><span><b>Products Management</b><small>Add, edit and manage products and categories.</small></span></label>
+       <label class="permission-item"><input type="checkbox" class="staff-permission" value="orders"><span><b>Orders Management</b><small>View orders and update order statuses.</small></span></label>
+       <label class="permission-item"><input type="checkbox" class="staff-permission" value="customers"><span><b>Customer Details</b><small>View and manage customer accounts.</small></span></label>
+       <label class="permission-item"><input type="checkbox" class="staff-permission" value="stock"><span><b>Stock Management</b><small>Access stock-related management.</small></span></label>
+       <label class="permission-item"><input type="checkbox" class="staff-permission" value="invoices"><span><b>Invoice Management</b><small>Access invoice-related functions.</small></span></label>
+      </div><span class="form-help">Staff Management permission is reserved for the Chairman and cannot be assigned to staff.</span></div>
+     </div>
+     <div class="staff-form-actions"><button class="btn btn-gold" type="submit" id="saveStaffBtn">SAVE STAFF</button><button class="btn btn-light" type="button" id="cancelStaffBtn">CANCEL</button></div>
+     <p class="error" id="staffFormMessage"></p>
+    </form>
+   </div>
+
+   <div class="panel">
+    <div class="panel-head"><div><h3>Manage Positions</h3><p>Create position titles to assign to staff members.</p></div></div>
+    <form id="positionForm" style="display:flex;gap:10px;flex-wrap:wrap"><input class="field-control" id="newPositionName" placeholder="Example: Stock Manager" required style="max-width:350px"><button class="btn btn-gold" type="submit">+ ADD POSITION</button></form>
+    <div id="positionList" style="margin-top:15px"></div>
+   </div>
+  </section>
+
+  <!-- MY PROFILE -->
+  <section id="page-profile" class="page-section hidden">
+   <div class="panel">
+    <div class="panel-head"><div><h3>My Profile</h3><p>Update your personal account information.</p></div></div>
+    <div class="profile-header"><div class="staff-avatar" id="profileAvatar">C</div><div><b id="profileDisplayName">Admin</b><div class="muted" id="profileDisplayPosition">Administrator</div><span class="badge gold-badge" id="profileAccountType">Account</span></div></div>
+    <form id="profileForm">
+     <div class="form-grid">
+      <div class="form-field"><label>FULL NAME *</label><input class="field-control" id="profileFullName" required></div>
+      <div class="form-field"><label>USERNAME *</label><input class="field-control" id="profileUsername" required></div>
+      <div class="form-field"><label>EMAIL</label><input class="field-control" id="profileEmail" type="email"></div>
+      <div class="form-field"><label>PHONE</label><input class="field-control" id="profilePhone"></div>
+      <div class="form-field full-width"><label>PROFILE PHOTO (OPTIONAL)</label><input class="field-control" id="profilePhoto" type="file" accept="image/jpeg,image/png,image/webp"><span class="form-help">JPG, PNG or WEBP. Maximum 2MB.</span></div>
+     </div>
+     <button class="btn btn-gold" type="submit" id="saveProfileBtn">SAVE PROFILE</button><p class="error" id="profileMessage"></p>
+    </form>
+   </div>
+   <div class="panel">
+    <div class="panel-head"><div><h3>Change Password</h3><p>Choose a new password for your account.</p></div></div>
+    <form id="passwordForm">
+     <div class="form-grid">
+      <div class="form-field"><label>CURRENT PASSWORD *</label><input class="field-control" id="currentPassword" type="password" required autocomplete="current-password"></div>
+      <div class="form-field"><label>NEW PASSWORD *</label><input class="field-control" id="newPassword" type="password" required minlength="8" autocomplete="new-password"></div>
+      <div class="form-field"><label>CONFIRM NEW PASSWORD *</label><input class="field-control" id="confirmPassword" type="password" required minlength="8" autocomplete="new-password"></div>
+     </div>
+     <button class="btn btn-gold" type="submit">CHANGE PASSWORD</button><p class="error" id="passwordMessage"></p>
+    </form>
+   </div>
+  </section>
+
+ </main>
+</div>
+
+
+<div id="orderDetailsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+ <div class="order-modal">
+  <div class="order-modal-head">
+   <div><h3 id="orderModalTitle">Order Details</h3><div id="orderModalSubtitle" style="font-size:12px;color:#d8dfeb;margin-top:4px"></div></div>
+   <button type="button" class="order-modal-close" id="closeOrderModal" aria-label="Close">&times;</button>
+  </div>
+  <div class="order-modal-body" id="orderModalBody"></div>
+ </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const API = '';
+
+let allOrders=[],allCustomers=[],allProducts=[],allCategories=[];
+let existingImages=[],newImageFiles=[];
+let currentPage='dashboard',productPage=1;
+let currentAccount=null,staffList=[],positions=[];
+let editingStaffPhoto='';
+const PRODUCTS_PER_PAGE=25;
+
+async function api(url,options={}){
+ const config={credentials:'same-origin',...options,headers:{
+  ...(options.body&&!(options.body instanceof FormData)?{'Content-Type':'application/json'}:{}),
+  ...(options.headers||{})
+ }};
+ const response=await fetch(API+url,config);
+ const contentType=response.headers.get('content-type')||'';
+ const data=contentType.includes('application/json')?await response.json():await response.text();
+ if(!response.ok)throw new Error(typeof data==='object'?data.error||data.message||'Request failed.':data||'Request failed.');
+ return data;
+}
+function unwrapList(data,key){
+ if(Array.isArray(data))return data;
+ if(Array.isArray(data?.[key]))return data[key];
+ if(Array.isArray(data?.data))return data.data;
+ return [];
+}
+function money(value){return 'LKR '+Number(value||0).toLocaleString('en-LK',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function escapeHTML(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function dateText(value){if(!value)return '-';const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleDateString('en-GB')}
+function getOrderId(o){return o.id??o.orderId??o.order_id??''}
+function getOrderNumber(o){return o.orderNumber??o.order_number??o.id??'-'}
+function getCustomerName(o){return o.customerName??o.customer_name??o.name??o.customer?.name??'-'}
+function getOrderTotal(o){return Number(o.total??o.totalAmount??o.total_amount??o.subtotal??o.grandTotal??o.grand_total??o.amount??0)}
+function getOrderStatus(o){return o.status||'Pending'}
+function isCancelled(o){return String(getOrderStatus(o)).toLowerCase()==='cancelled'}
+function getOrderItems(o){const items=o.items??o.orderItems??o.order_items??[];return Array.isArray(items)?items.map(i=>`${i.name??i.productName??i.product_name??'Product'} × ${i.quantity??i.qty??1}`).join(', '):String(items||'-')}
+function getCategoryId(c){return c.id??c.categoryId??c.category_id}
+function getCategoryParentId(c){if(Object.prototype.hasOwnProperty.call(c,'parentId'))return c.parentId;if(Object.prototype.hasOwnProperty.call(c,'parent_id'))return c.parent_id;return undefined}
+function getMainCategories(){return allCategories.filter(c=>getCategoryParentId(c)===null||getCategoryParentId(c)===undefined||getCategoryParentId(c)==='')}
+function getSubcategories(mainId){return allCategories.filter(c=>{const p=getCategoryParentId(c);return p!==null&&p!==undefined&&String(p)===String(mainId)})}
+function getCategoryName(id){const c=allCategories.find(x=>String(getCategoryId(x))===String(id));return c?.name||'-'}
+
+function normaliseAccountResponse(result){
+ const account=result?.account||result?.admin||result?.user||{};
+ const adminType=String(result?.adminType||account.adminType||account.type||'').toLowerCase();
+ const permissions=Array.isArray(account.permissions)?account.permissions:(Array.isArray(result?.permissions)?result.permissions:[]);
+ return {...account,type:adminType||account.type||'',adminType:adminType||account.adminType||'',permissions};
+}
+function isChairman(){
+ return ['chairman','owner','superadmin','super_admin'].includes(String(currentAccount?.type||currentAccount?.adminType||'').toLowerCase())
+  ||String(currentAccount?.position||'').toLowerCase()==='chairman'
+  ||(Array.isArray(currentAccount?.permissions)&&currentAccount.permissions.includes('all'));
+}
+function hasPermission(permission){
+ if(isChairman())return true;
+ return Array.isArray(currentAccount?.permissions)&&currentAccount.permissions.includes(permission);
+}
+function applyAccess(){
+ document.querySelectorAll('[data-chairman-only]').forEach(el=>el.classList.toggle('hidden',!isChairman()));
+ document.querySelectorAll('[data-permission]').forEach(el=>el.classList.toggle('hidden',!hasPermission(el.dataset.permission)));
+ document.querySelectorAll('[data-page-permission]').forEach(el=>el.classList.toggle('hidden',!hasPermission(el.dataset.pagePermission)));
+ document.querySelectorAll('[data-menu-permission]').forEach(el=>el.classList.toggle('hidden',!hasPermission(el.dataset.menuPermission)));
+}
+function firstAvailablePage(){
+ if(hasPermission('dashboard'))return 'dashboard';
+ for(const p of ['orders','customers','products'])if(hasPermission(p))return p;
+ return 'profile';
+}
+function updateHeader(){
+ const name=currentAccount?.fullName||currentAccount?.full_name||currentAccount?.username||'Admin';
+ const position=currentAccount?.position||(isChairman()?'Chairman':'Staff');
+ $('headerName').textContent=name;$('headerPosition').textContent=position;
+ const photo=currentAccount?.profileImage||currentAccount?.profile_image||'';
+ $('headerAvatar').innerHTML=photo?`<img src="${escapeHTML(photo)}" alt="">`:escapeHTML(name.charAt(0).toUpperCase());
+}
+async function checkLogin(){
+ try{
+  const result=await api('/api/admin/me');
+  if(!result.loggedIn)throw new Error('Not logged in');
+  currentAccount=normaliseAccountResponse(result);
+  showAdmin();
+ }catch{$('loginPage').classList.remove('hidden');$('adminApp').classList.add('hidden')}
+}
+function showAdmin(){
+ $('loginPage').classList.add('hidden');$('adminApp').classList.remove('hidden');
+ updateHeader();applyAccess();showPage(firstAvailablePage());
+}
+$('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('loginError').textContent='';
+ try{
+  const result=await api('/api/admin/login',{method:'POST',body:JSON.stringify({username:$('username').value.trim(),password:$('password').value})});
+  const me=await api('/api/admin/me');currentAccount=normaliseAccountResponse(me);
+  showAdmin();
+ }catch(err){$('loginError').textContent=err.message}
+});
+$('logoutBtn').addEventListener('click',async()=>{try{await api('/api/admin/logout',{method:'POST'})}catch(e){console.error(e)}location.reload()});
+
+const pageInfo={
+ dashboard:['Dashboard','Welcome to your Ceyloria store management.'],
+ orders:['Orders','Manage and track customer orders.'],
+ customers:['Customers','View registered customer accounts.'],
+ analytics:['Sales Analytics','View your store sales performance.'],
+ products:['Manage Products','View, search, edit and delete products.'],
+ categories:['Manage Categories','Manage Main Categories and Subcategories.'],
+ addProduct:['Add New Product','Add a new product to your Ceyloria store.'],
+ staff:['Staff Management','Manage staff accounts, positions and permissions.'],
+ profile:['My Profile','Manage your personal account information.']
+};
+function showPage(page){
+ if(!pageInfo[page])return;
+ if(page==='staff'&&!isChairman()){alert('Only the Chairman can access Staff Management.');return}
+ const permissionMap={dashboard:'dashboard',analytics:'dashboard',orders:'orders',customers:'customers',products:'products',categories:'products',addProduct:'products'};
+ if(permissionMap[page]&&!hasPermission(permissionMap[page])){alert('You do not have permission to access this section.');return}
+ currentPage=page;
+ document.querySelectorAll('.page-section').forEach(s=>s.classList.add('hidden'));
+ $('page-'+page).classList.remove('hidden');
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ $('pageHeading').textContent=pageInfo[page][0];$('pageSubheading').textContent=pageInfo[page][1];
+ $('sidebar').classList.remove('open');
+ if(page==='dashboard')loadDashboard();
+ if(page==='orders')loadOrders();
+ if(page==='customers')loadCustomers();
+ if(page==='analytics')loadAnalytics();
+ if(['products','categories','addProduct'].includes(page))loadProducts();
+ if(page==='staff')loadStaffManagement();
+ if(page==='profile')loadProfile();
+}
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.goto)));
+$('mobileMenu').addEventListener('click',()=>$('sidebar').classList.toggle('open'));
+$('goAddProduct').addEventListener('click',()=>startNewProduct());
+$('resetProductBtn').addEventListener('click',()=>startNewProduct());
+$('cancelProductBtn').addEventListener('click',()=>showPage('products'));
+
+/* DASHBOARD */
+async function loadDashboard(){
+ try{
+  const [od,cd]=await Promise.all([api('/api/admin/orders'),api('/api/admin/customers')]);
+  allOrders=unwrapList(od,'orders');allCustomers=unwrapList(cd,'customers');
+  const valid=allOrders.filter(o=>!isCancelled(o));
+  $('total').textContent=allOrders.length;$('customerCount').textContent=allCustomers.length;
+  $('sales').textContent=money(valid.reduce((s,o)=>s+getOrderTotal(o),0));
+  $('pending').textContent=allOrders.filter(o=>['pending','order confirmed','preparing'].includes(getOrderStatus(o).toLowerCase())).length;
+  renderRecentOrders();renderSalesChart('dashboardChart',valid);
+ }catch(e){console.error('Dashboard:',e)}
+}
+function renderRecentOrders(){
+ const recent=[...allOrders].sort((a,b)=>new Date(b.createdAt??b.created_at??0)-new Date(a.createdAt??a.created_at??0)).slice(0,6);
+ if(!recent.length){$('recentOrders').innerHTML='<tr><td colspan="5" class="empty">No orders yet.</td></tr>';return}
+ $('recentOrders').innerHTML=recent.map(o=>`<tr><td><b>#${escapeHTML(getOrderNumber(o))}</b></td><td>${escapeHTML(getCustomerName(o))}</td><td>${dateText(o.createdAt??o.created_at)}</td><td><b>${money(getOrderTotal(o))}</b></td><td><span class="badge">${escapeHTML(getOrderStatus(o))}</span></td></tr>`).join('');
+}
+
+/* ORDERS */
+async function loadOrders(){
+ try{allOrders=unwrapList(await api('/api/admin/orders'),'orders');renderOrders()}
+ catch(e){$('orders').innerHTML=`<tr><td colspan="8" class="empty">${escapeHTML(e.message)}</td></tr>`}
+}
+function renderOrders(){
+  const q=($('orderSearch').value||'').toLowerCase();
+  const filtered=allOrders.filter(o=>[
+    getOrderNumber(o),getCustomerName(o),o.email,o.customerEmail,o.customer_email,
+    o.phone,o.address
+  ].join(' ').toLowerCase().includes(q));
+  if(!filtered.length){$('orders').innerHTML='<tr><td colspan="8" class="empty">No matching orders found.</td></tr>';return}
+  const statuses=['Pending','Order Confirmed','Preparing','Dispatched','On the Way','Delivered','Cancelled'];
+  $('orders').innerHTML=filtered.map(o=>{
+    const id=getOrderId(o),status=getOrderStatus(o),email=o.email??o.customerEmail??o.customer_email??'-';
+    const invoice=hasPermission('invoices')?`<button class="btn small-btn" type="button" data-view-invoice="${escapeHTML(id)}">INVOICE</button>`:'';
+    return `<tr>
+      <td><b>#${escapeHTML(getOrderNumber(o))}</b><br><span class="muted">${dateText(o.createdAt??o.created_at)}</span></td>
+      <td>${escapeHTML(getCustomerName(o))}<br><span class="muted">${escapeHTML(email)}</span></td>
+      <td>${escapeHTML(getOrderItems(o))}</td>
+      <td><b>${money(getOrderTotal(o))}</b></td>
+      <td><select class="status-select" data-status-id="${escapeHTML(id)}">${statuses.map(s=>`<option value="${s}" ${s.toLowerCase()===status.toLowerCase()?'selected':''}>${s}</option>`).join('')}</select></td>
+      <td>${escapeHTML(email)}</td>
+      <td><a href="/track-order.html?order=${encodeURIComponent(getOrderNumber(o))}" target="_blank" rel="noopener">Track ↗</a>${invoice}</td>
+      <td><div class="order-row-actions">
+        <button class="btn small-btn" type="button" data-order-details="${escapeHTML(id)}">VIEW</button>
+        <button class="btn small-btn" type="button" data-save-status="${escapeHTML(id)}">SAVE</button>
+        <button class="delete-btn" type="button" data-delete-order="${escapeHTML(id)}">DELETE</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  document.querySelectorAll('[data-save-status]').forEach(b=>b.addEventListener('click',()=>updateOrderStatus(b.dataset.saveStatus)));
+  document.querySelectorAll('[data-order-details]').forEach(b=>b.addEventListener('click',()=>showOrderDetails(b.dataset.orderDetails)));
+  document.querySelectorAll('[data-delete-order]').forEach(b=>b.addEventListener('click',()=>deleteOrder(b.dataset.deleteOrder)));
+  document.querySelectorAll('[data-view-invoice]').forEach(b=>b.addEventListener('click',()=>openAdminInvoice(b.dataset.viewInvoice)));
+}
+
+async function updateOrderStatus(id){
+  const order=allOrders.find(o=>String(getOrderId(o))===String(id));
+  const select=document.querySelector(`[data-status-id="${CSS.escape(String(id))}"]`);
+  if(!select){alert('Order status selector not found. Please refresh the page.');return}
+  const status=select.value;
+  const button=document.querySelector(`[data-save-status="${CSS.escape(String(id))}"]`);
+  if(button){button.disabled=true;button.textContent='SAVING...'}
+  try{
+    await api(`/api/admin/orders/${encodeURIComponent(id)}/status`,{
+      method:'PATCH',
+      body:JSON.stringify({status})
+    });
+    if(order)order.status=status;
+    if(button){button.textContent='SAVED';}
+    await Promise.all([loadDashboard()]);
+    setTimeout(()=>{if(button){button.disabled=false;button.textContent='SAVE'}},900);
+  }catch(error){
+    if(button){button.disabled=false;button.textContent='SAVE'}
+    alert(error.message||'Unable to save order status.');
+  }
+}
+
+function orderItemImage(item){
+  if(item.image)return item.image;
+  if(item.imageUrl)return item.imageUrl;
+  if(item.image_url)return item.image_url;
+  if(Array.isArray(item.images)&&item.images.length)return typeof item.images[0]==='string'?item.images[0]:item.images[0].url||'';
+  return '';
+}
+function showOrderDetails(id){
+  const order=allOrders.find(o=>String(getOrderId(o))===String(id));
+  if(!order){alert('Order details not found. Please refresh the orders list.');return}
+  const items=Array.isArray(order.items)?order.items:(Array.isArray(order.orderItems)?order.orderItems:[]);
+  $('orderModalTitle').textContent='Order #'+getOrderNumber(order);
+  $('orderModalSubtitle').textContent='Placed '+dateText(order.createdAt??order.created_at)+' · '+getOrderStatus(order);
+  const itemHtml=items.length?items.map(item=>{
+    const image=orderItemImage(item);
+    const productId=item.productId??item.product_id??'Not available';
+    const qty=Number(item.quantity??item.qty??1);
+    const price=Number(item.price??item.unitPrice??item.unit_price??0);
+    const total=Number(item.total??price*qty);
+    return `<div class="order-item-card">
+      ${image?`<img src="${escapeHTML(image)}" alt="${escapeHTML(item.name||item.productName||'Product')}" onerror="this.style.display='none'">`:'<div class="order-item-placeholder">No image</div>'}
+      <div><h4>${escapeHTML(item.name??item.productName??item.product_name??'Product')}</h4>
+       <div class="order-item-meta">Product ID: <b>${escapeHTML(productId)}</b><br>Size: ${escapeHTML(item.size||'-')} · Colour: ${escapeHTML(item.colour||item.color||'-')}<br>Quantity: ${qty} · Unit Price: ${money(price)}</div>
+      </div><div class="order-item-price"><b>${money(total)}</b></div>
+    </div>`;
+  }).join(''):'<p class="empty">No item details are saved for this order.</p>';
+  $('orderModalBody').innerHTML=`
+    <div class="order-info-grid">
+      <div class="order-info-card"><small>CUSTOMER</small><b>${escapeHTML(getCustomerName(order))}</b></div>
+      <div class="order-info-card"><small>PHONE</small><b>${escapeHTML(order.phone||'-')}</b></div>
+      <div class="order-info-card"><small>EMAIL</small><b>${escapeHTML(order.email||'-')}</b></div>
+      <div class="order-info-card"><small>DELIVERY ADDRESS</small><b>${escapeHTML(order.address||'-')}, ${escapeHTML(order.country||'')}</b></div>
+      <div class="order-info-card"><small>PAYMENT</small><b>${escapeHTML(order.payment||'-')}</b></div>
+      <div class="order-info-card"><small>ORDER NOTES</small><b>${escapeHTML(order.notes||'-')}</b></div>
+    </div>
+    <h4>ORDERED PRODUCTS</h4>${itemHtml}
+    <div class="order-modal-total"><span>ORDER TOTAL</span><span>${money(getOrderTotal(order))}</span></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:20px">
+      ${hasPermission('invoices')?`<button class="btn btn-gold" type="button" onclick="openAdminInvoice('${escapeHTML(id)}')">VIEW INVOICE</button>`:''}
+      <button class="btn" type="button" onclick="closeOrderDetails()">CLOSE</button>
+    </div>`;
+  $('orderDetailsModal').classList.remove('hidden');
+}
+function closeOrderDetails(){
+  $('orderDetailsModal').classList.add('hidden');
+}
+async function openAdminInvoice(id){
+  const invoiceWindow=window.open('about:blank','_blank');
+  if(!invoiceWindow){alert('Please allow pop-ups to view the invoice.');return}
+  try{
+    invoiceWindow.document.write('<p style="font-family:Arial;padding:24px">Loading invoice…</p>');
+    const response=await fetch(`/api/admin/orders/${encodeURIComponent(id)}/invoice`,{credentials:'same-origin'});
+    if(!response.ok){const message=await response.text();throw new Error(message||'Unable to open invoice.')}
+    const html=await response.text();
+    invoiceWindow.document.open();invoiceWindow.document.write(html);invoiceWindow.document.close();
+  }catch(error){
+    invoiceWindow.close();
+    alert(error.message);
+  }
+}
+async function deleteOrder(id){
+  const order=allOrders.find(o=>String(getOrderId(o))===String(id));
+  const label=order?getOrderNumber(order):id;
+  if(!confirm(`Delete order ${label}? The ordered quantities will be added back to product stock.`))return;
+  try{
+    await api(`/api/admin/orders/${encodeURIComponent(id)}`,{method:'DELETE'});
+    closeOrderDetails();
+    await Promise.all([loadOrders(),loadDashboard(),loadProducts()]);
+    alert('Order deleted. Product stock has been restored.');
+  }catch(error){alert(error.message)}
+}
+$('closeOrderModal').addEventListener('click',closeOrderDetails);
+$('orderDetailsModal').addEventListener('click',event=>{if(event.target===$('orderDetailsModal'))closeOrderDetails()});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeOrderDetails()});
+
+$('orderSearch').addEventListener('input',renderOrders);
+
+/* CUSTOMERS */
+async function loadCustomers(){
+ try{allCustomers=unwrapList(await api('/api/admin/customers'),'customers');renderCustomers()}
+ catch(e){$('customers').innerHTML=`<tr><td colspan="8" class="empty">${escapeHTML(e.message)}</td></tr>`}
+}
+function renderCustomers(){
+ const q=($('customerSearch').value||'').toLowerCase();
+ const filtered=allCustomers.filter(c=>[c.name,c.email,c.phone,c.address].join(' ').toLowerCase().includes(q));
+ if(!filtered.length){$('customers').innerHTML='<tr><td colspan="8" class="empty">No customers found.</td></tr>';return}
+ $('customers').innerHTML=filtered.map(c=>{
+  const id=c.id??c.userId??c.user_id;
+  return `<tr><td><b>${escapeHTML(c.name||'-')}</b></td><td>${escapeHTML(c.email||'-')}<br>${escapeHTML(c.phone||'')}</td><td>${escapeHTML(c.address||'-')}</td><td>${dateText(c.createdAt??c.created_at)}</td><td>${c.emailNotifications===false||c.email_notifications===0?'Disabled':'Enabled'}</td><td>${Number(c.orderCount??c.order_count??0)}</td><td>${money(c.totalSpent??c.total_spent??0)}</td><td><button class="delete-btn" data-delete-customer="${escapeHTML(id)}">DELETE</button></td></tr>`;
+ }).join('');
+ document.querySelectorAll('[data-delete-customer]').forEach(b=>b.addEventListener('click',()=>deleteCustomer(b.dataset.deleteCustomer)));
+}
+async function deleteCustomer(id){
+ if(!confirm('Delete this customer account? Their orders will remain.'))return;
+ try{await api(`/api/admin/customers/${encodeURIComponent(id)}`,{method:'DELETE'});alert('Customer deleted.');loadCustomers()}
+ catch(e){alert(e.message)}
+}
+$('customerSearch').addEventListener('input',renderCustomers);
+
+/* ANALYTICS */
+async function loadAnalytics(){
+ try{
+  allOrders=unwrapList(await api('/api/admin/orders'),'orders');
+  const valid=allOrders.filter(o=>!isCancelled(o));
+  $('analyticsSales').textContent=money(valid.reduce((s,o)=>s+getOrderTotal(o),0));
+  $('analyticsOrders').textContent=allOrders.length;renderSalesChart('analyticsChart',valid);
+ }catch(e){console.error(e)}
+}
+function renderSalesChart(elementId,orders){
+ const months=[],now=new Date();
+ for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({year:d.getFullYear(),month:d.getMonth(),label:d.toLocaleString('en-US',{month:'short'})})}
+ const values=months.map(m=>orders.filter(o=>{const d=new Date(o.createdAt??o.created_at);return d.getFullYear()===m.year&&d.getMonth()===m.month}).reduce((s,o)=>s+getOrderTotal(o),0));
+ const max=Math.max(...values,1);
+ $(elementId).innerHTML=months.map((m,i)=>`<div class="chart-column"><span class="chart-amount">${values[i]?Math.round(values[i]/1000)+'k':'0'}</span><div class="chart-bar" style="height:${Math.max(2,values[i]/max*155)}px"></div><span class="chart-month">${m.label}</span></div>`).join('');
+}
+
+/* PRODUCTS AND CATEGORIES */
+async function loadProducts(){
+ try{
+  const [pd,cd]=await Promise.all([api('/api/admin/products'),api('/api/admin/categories')]);
+  allProducts=unwrapList(pd,'products');allCategories=unwrapList(cd,'categories');
+  renderCategoryOptions();renderCategories();renderProducts();
+ }catch(e){console.error('Product loading:',e);$('productList').innerHTML=`<div class="empty">${escapeHTML(e.message)}</div>`;$('categoryList').innerHTML=`<div class="empty">${escapeHTML(e.message)}</div>`}
+}
+function renderCategoryOptions(){
+ const mains=getMainCategories();
+ $('newCategoryParent').innerHTML='<option value="">Main Category</option>'+mains.map(c=>`<option value="${escapeHTML(getCategoryId(c))}">${escapeHTML(c.name)}</option>`).join('');
+ $('productMainCategory').innerHTML='<option value="">Select main category</option>'+mains.map(c=>`<option value="${escapeHTML(getCategoryId(c))}">${escapeHTML(c.name)}</option>`).join('');
+ const filter=$('productCategoryFilter'),previous=filter.value;
+ filter.innerHTML='<option value="">All Main Categories</option>'+mains.map(c=>`<option value="${escapeHTML(getCategoryId(c))}">${escapeHTML(c.name)}</option>`).join('');
+ if([...filter.options].some(o=>o.value===previous))filter.value=previous;
+}
+function renderCategories(){
+ const mains=getMainCategories();
+ if(!mains.length){$('categoryList').innerHTML='<div class="empty">No Main Categories yet. Add your first category above.</div>';return}
+ $('categoryList').innerHTML=mains.map(main=>{
+  const id=getCategoryId(main),children=getSubcategories(id);
+  return `<div class="category-main-card"><div class="category-main-heading"><div><b>${escapeHTML(main.name)}</b><div class="category-parent-label">MAIN CATEGORY · ${children.length} SUBCATEGORIES</div></div><button class="delete-btn" data-delete-category="${escapeHTML(id)}">DELETE</button></div><div class="category-sub-list">${children.length?children.map(sub=>`<div class="category-child-row"><div>↳ ${escapeHTML(sub.name)}<div class="category-parent-label">SUBCATEGORY</div></div><button class="delete-btn small-btn" data-delete-category="${escapeHTML(getCategoryId(sub))}">DELETE</button></div>`).join(''):'<div class="muted" style="padding:12px 0;font-size:12px">No subcategories added yet.</div>'}</div></div>`;
+ }).join('');
+ document.querySelectorAll('[data-delete-category]').forEach(b=>b.addEventListener('click',()=>deleteCategory(b.dataset.deleteCategory)));
+}
+$('categoryForm').addEventListener('submit',async e=>{
+ e.preventDefault();const name=$('newCategoryName').value.trim(),v=$('newCategoryParent').value,parentId=v?Number(v):null;if(!name)return;
+ try{await api('/api/admin/categories',{method:'POST',body:JSON.stringify({name,parentId})});$('newCategoryName').value='';$('newCategoryParent').value='';await loadProducts();alert(parentId?'Subcategory added successfully.':'Main Category added successfully.')}
+ catch(err){alert(err.message)}
+});
+async function deleteCategory(id){
+ const category=allCategories.find(c=>String(getCategoryId(c))===String(id)),parent=getCategoryParentId(category||{}),isMain=category&&(parent===null||parent===undefined||parent==='');
+ if(!confirm(isMain?'Delete this Main Category? It must not have subcategories.':'Delete this Subcategory?'))return;
+ try{await api(`/api/admin/categories/${encodeURIComponent(id)}`,{method:'DELETE'});await loadProducts();alert('Category deleted.')}
+ catch(e){alert(e.message)}
+}
+$('productMainCategory').addEventListener('change',()=>{
+ const mainId=$('productMainCategory').value,sub=$('productCategory');
+ if(!mainId){sub.innerHTML='<option value="">Select main category first</option>';sub.disabled=true;return}
+ const children=getSubcategories(mainId);sub.disabled=false;
+ sub.innerHTML='<option value="">Select subcategory</option>'+children.map(c=>`<option value="${escapeHTML(getCategoryId(c))}">${escapeHTML(c.name)}</option>`).join('');
+ if(!children.length){sub.innerHTML='<option value="">No subcategories available</option>';sub.disabled=true}
+});
+function getProductMainId(p){return p.mainCategoryId??p.main_category_id??p.categoryId??p.category_id??p.category?.id??''}
+function getProductSubcategoryId(p){return p.subcategoryId??p.subcategory_id??p.subcategory?.id??''}
+function getProductId(p){return p.dbId??p.id??p.productId??p.product_id}
+function getProductImages(p){
+ const imgs=p.images||[],list=Array.isArray(imgs)?imgs.map(x=>typeof x==='string'?x:x.url||x.imageUrl||x.image_url).filter(Boolean):[];
+ if(!list.length){const single=p.imageUrl??p.image_url??p.image;if(single)list.push(single)}
+ return list;
+}
+function renderProducts(){
+ const q=($('productSearch').value||'').toLowerCase(),selected=$('productCategoryFilter').value;
+ const filtered=allProducts.filter(p=>{
+  const text=[p.name,p.description,p.material,getCategoryName(getProductMainId(p)),getCategoryName(getProductSubcategoryId(p))].join(' ').toLowerCase();
+  const main=String(getProductMainId(p)),sub=String(getProductSubcategoryId(p));
+  return text.includes(q)&&(!selected||main===selected||sub===selected);
+ });
+ const pages=Math.max(1,Math.ceil(filtered.length/PRODUCTS_PER_PAGE));if(productPage>pages)productPage=pages;
+ const visible=filtered.slice((productPage-1)*PRODUCTS_PER_PAGE,productPage*PRODUCTS_PER_PAGE);
+ if(!visible.length){$('productList').innerHTML='<div class="empty">No products found. Click Add New Product to create one.</div>';$('productPagination').innerHTML='';return}
+ $('productList').innerHTML=visible.map(p=>{
+  const id=getProductId(p),images=getProductImages(p),image=images[0]||'',status=p.status||(p.active===false||p.active===0?'Inactive':'Active');
+  const stock=p.stockQuantity??p.stock_quantity,discount=p.discountPrice??p.discount_price;
+  return `<div class="product-card"><img src="${escapeHTML(image)}" alt="${escapeHTML(p.name)}" onerror="this.style.visibility='hidden'"><div class="product-card-body"><h4>${escapeHTML(p.name)}</h4><p><b>Product ID:</b> ${escapeHTML(p.productId??p.dbId??p.id??'-')}</p><p>${escapeHTML(getCategoryName(getProductMainId(p)))} / ${escapeHTML(getCategoryName(getProductSubcategoryId(p)))}</p><p><b>${money(p.price)}</b>${discount!==null&&discount!==undefined&&discount!==''?` <span style="color:#b83232">Discount: ${money(discount)}</span>`:''}</p><p>Material: ${escapeHTML(p.material||'-')}</p><p>Stock: ${stock===null||stock===undefined?'Not set':escapeHTML(stock)}</p><p><span class="badge ${String(status).toLowerCase()==='active'?'product-status-active':'product-status-inactive'}">${escapeHTML(status)}</span></p><p>${escapeHTML((p.description||'').slice(0,90))}</p><div class="product-actions"><button class="btn small-btn" data-edit-product="${escapeHTML(id)}">EDIT</button><button class="delete-btn" data-delete-product="${escapeHTML(id)}">DELETE</button></div></div></div>`;
+ }).join('');
+ document.querySelectorAll('[data-edit-product]').forEach(b=>b.addEventListener('click',()=>editProduct(b.dataset.editProduct)));
+ document.querySelectorAll('[data-delete-product]').forEach(b=>b.addEventListener('click',()=>deleteProduct(b.dataset.deleteProduct)));
+ renderProductPagination(pages);
+}
+function renderProductPagination(pages){
+ if(pages<=1){$('productPagination').innerHTML='';return}
+ let html=`<button ${productPage===1?'disabled':''} data-page="${productPage-1}">← Previous</button>`;
+ for(let i=1;i<=pages;i++)if(i===1||i===pages||Math.abs(i-productPage)<=2)html+=`<button class="${i===productPage?'active':''}" data-page="${i}">${i}</button>`;
+ html+=`<button ${productPage===pages?'disabled':''} data-page="${productPage+1}">Next →</button>`;
+ $('productPagination').innerHTML=html;
+ document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>{const n=Number(b.dataset.page);if(n>=1&&n<=pages){productPage=n;renderProducts()}}));
+}
+$('productSearch').addEventListener('input',()=>{productPage=1;renderProducts()});
+$('productCategoryFilter').addEventListener('change',()=>{productPage=1;renderProducts()});
+
+/* PRODUCT EDITOR */
+function startNewProduct(){
+ $('productForm').reset();$('editProductId').value='';$('editorTitle').textContent='Add New Product';$('productFormMessage').textContent='';$('productStatus').value='Active';$('productStock').value='0';$('productMainCategory').value='';$('productCategory').innerHTML='<option value="">Select main category first</option>';$('productCategory').disabled=true;$('sizeRows').innerHTML='';existingImages=[];newImageFiles=[];$('productImages').value='';addSizeRow();renderImagePreviews();showPage('addProduct');
+}
+function addSizeRow(size='',price=''){
+ const row=document.createElement('div');row.className='size-row';
+ row.innerHTML=`<input class="field-control size-name" placeholder='Example: 6", Medium' value="${escapeHTML(size)}"><input class="field-control size-price" type="number" min="0" step="0.01" placeholder="Price" value="${escapeHTML(price)}"><button class="size-remove" type="button">REMOVE</button>`;
+ row.querySelector('.size-remove').addEventListener('click',()=>row.remove());$('sizeRows').appendChild(row);
+}
+$('addSizeBtn').addEventListener('click',()=>addSizeRow());
+function readSizeRows(){return [...document.querySelectorAll('#sizeRows .size-row')].map(row=>({size:row.querySelector('.size-name').value.trim(),price:Number(row.querySelector('.size-price').value)})).filter(x=>x.size&&Number.isFinite(x.price)&&x.price>=0)}
+function editProduct(id){
+ const p=allProducts.find(x=>String(getProductId(x))===String(id));if(!p)return;
+ $('productForm').reset();$('editProductId').value=id;$('editorTitle').textContent='Edit Product';
+ $('productName').value=p.name||'';$('productDescription').value=p.description||'';$('productPrice').value=p.price??'';
+ $('productDiscountPrice').value=p.discountPrice??p.discount_price??'';$('productMaterial').value=p.material||'';
+ $('productStock').value=p.stockQuantity??p.stock_quantity??0;$('productStatus').value=p.status||(p.active===false||p.active===0?'Inactive':'Active');
+ const mainId=getProductMainId(p),subId=getProductSubcategoryId(p);$('productMainCategory').value=String(mainId||'');$('productMainCategory').dispatchEvent(new Event('change'));$('productCategory').value=String(subId||'');
+ $('sizeRows').innerHTML='';const sizes=p.sizes||p.sizeOptions||p.size_options||[];
+ if(Array.isArray(sizes))sizes.forEach(s=>{if(typeof s==='object')addSizeRow(s.size??s.name??'',s.price??'');else addSizeRow(String(s),'')});
+ existingImages=getProductImages(p);newImageFiles=[];$('productImages').value='';renderImagePreviews();showPage('addProduct');
+}
+function fileToDataURL(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Image read failed.'));reader.readAsDataURL(file)})}
+function addSelectedFiles(files){
+ const selected=[...files];
+ if(selected.some(f=>!['image/jpeg','image/png','image/webp','image/gif'].includes(f.type))){alert('JPG, PNG, WEBP or GIF images only.');return}
+ if(selected.some(f=>f.size>5*1024*1024)){alert('Each image must be smaller than 5MB.');return}
+ if(existingImages.length+newImageFiles.length+selected.length>8){alert('Maximum 8 images allowed.');return}
+ newImageFiles.push(...selected);renderImagePreviews();
+}
+$('chooseImagesBtn').addEventListener('click',()=>$('productImages').click());
+$('productImages').addEventListener('change',e=>{addSelectedFiles(e.target.files);e.target.value=''});
+const dropZone=$('dropZone');
+dropZone.addEventListener('click',e=>{if(e.target.id!=='chooseImagesBtn')$('productImages').click()});
+['dragenter','dragover'].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.add('dragover')}));
+['dragleave','drop'].forEach(name=>dropZone.addEventListener(name,e=>{e.preventDefault();dropZone.classList.remove('dragover')}));
+dropZone.addEventListener('drop',e=>addSelectedFiles(e.dataTransfer.files));
+function renderImagePreviews(){
+ const saved=existingImages.map((img,i)=>`<div class="image-preview"><img src="${escapeHTML(img)}" alt="Saved product image"><small>Saved image ${i+1}</small><button type="button" data-remove-existing="${i}">REMOVE</button></div>`).join('');
+ const fresh=newImageFiles.map((file,i)=>`<div class="image-preview"><img src="${URL.createObjectURL(file)}" alt="New product image"><small>${escapeHTML(file.name)}</small><button type="button" data-remove-new="${i}">REMOVE</button></div>`).join('');
+ $('imagePreview').innerHTML=saved+fresh;
+ document.querySelectorAll('[data-remove-existing]').forEach(b=>b.addEventListener('click',()=>{existingImages.splice(Number(b.dataset.removeExisting),1);renderImagePreviews()}));
+ document.querySelectorAll('[data-remove-new]').forEach(b=>b.addEventListener('click',()=>{newImageFiles.splice(Number(b.dataset.removeNew),1);renderImagePreviews()}));
+}
+$('productForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('productFormMessage').textContent='';
+ const name=$('productName').value.trim(),mainId=Number($('productMainCategory').value),subId=Number($('productCategory').value),price=Number($('productPrice').value),discountValue=$('productDiscountPrice').value,stockValue=$('productStock').value,sizes=readSizeRows();
+ if(!name||!mainId||!subId){$('productFormMessage').textContent='Product name, Main Category and Subcategory are required.';return}
+ if(!getSubcategories(mainId).some(c=>String(getCategoryId(c))===String(subId))){$('productFormMessage').textContent='Selected Subcategory does not belong to the selected Main Category.';return}
+ if(!Number.isFinite(price)||price<0){$('productFormMessage').textContent='Please enter a valid product price.';return}
+ if(stockValue===''||!Number.isInteger(Number(stockValue))||Number(stockValue)<0){$('productFormMessage').textContent='Stock Quantity must be a whole number (0 or more).';return}
+ for(const row of document.querySelectorAll('#sizeRows .size-row')){const s=row.querySelector('.size-name').value.trim(),v=row.querySelector('.size-price').value;if(s&&(v===''||!Number.isFinite(Number(v))||Number(v)<0)){$('productFormMessage').textContent='Please enter a valid price for every size.';return}}
+ const discount=discountValue===''?null:Number(discountValue);if(discount!==null&&(!Number.isFinite(discount)||discount<0)){$('productFormMessage').textContent='Please enter a valid Discount Price.';return}
+ const payload={name,description:$('productDescription').value.trim(),price,categoryId:mainId,mainCategoryId:mainId,subcategoryId:subId,discountPrice:discount,material:$('productMaterial').value.trim(),stockQuantity:Number(stockValue),status:$('productStatus').value,active:$('productStatus').value==='Active',colours:[],sizes,images:[...existingImages]};
+ const id=$('editProductId').value,button=$('saveProductBtn');button.disabled=true;button.textContent='SAVING...';
+ try{
+  if(newImageFiles.length){
+   const dataURLs=await Promise.all(newImageFiles.map(fileToDataURL));
+   const uploaded=await api('/api/admin/products/upload',{method:'POST',body:JSON.stringify({images:dataURLs})});
+   const uploadedImages=uploaded.images||uploaded.paths||uploaded.files||[];
+   if(!Array.isArray(uploadedImages)||uploadedImages.length!==newImageFiles.length)throw new Error('Image upload response was not in the expected format.');
+   payload.images.push(...uploadedImages.map(x=>typeof x==='string'?x:x.url||x.path||x.image).filter(Boolean));
+  }
+  const result=await api(id?`/api/admin/products/${encodeURIComponent(id)}`:'/api/admin/products',{method:id?'PUT':'POST',body:JSON.stringify(payload)});
+  alert(result.message||'Product saved successfully.');existingImages=[];newImageFiles=[];await loadProducts();showPage('products');
+ }catch(err){$('productFormMessage').textContent=err.message}
+ finally{button.disabled=false;button.textContent='SAVE PRODUCT'}
+});
+async function deleteProduct(id){
+ if(!confirm('Are you sure you want to delete this product?'))return;
+ try{await api(`/api/admin/products/${encodeURIComponent(id)}`,{method:'DELETE'});alert('Product deleted.');await loadProducts()}
+ catch(e){alert(e.message)}
+}
+
+/* STAFF MANAGEMENT */
+async function loadStaffManagement(){
+ if(!isChairman())return;
+ $('staffTable').innerHTML='<tr><td colspan="6" class="empty">Loading staff...</td></tr>';
+ try{
+  const [sd,pd]=await Promise.all([api('/api/admin/staff'),api('/api/admin/staff/positions')]);
+  staffList=unwrapList(sd,'staff');positions=unwrapList(pd,'positions');
+  renderStaff();renderPositions();renderPositionOptions();
+ }catch(e){$('staffTable').innerHTML=`<tr><td colspan="6" class="empty">${escapeHTML(e.message)}</td></tr>`}
+}
+function renderStaff(){
+ if(!staffList.length){$('staffTable').innerHTML='<tr><td colspan="6" class="empty">No staff accounts created yet.</td></tr>';return}
+ $('staffTable').innerHTML=staffList.map(s=>{
+  const id=s.id??s.staffId??s.staff_id,perms=Array.isArray(s.permissions)?s.permissions:[];
+  const photo=s.profileImage||s.profile_image||'',name=s.fullName||s.full_name||s.username||'Staff';
+  const active=s.active!==false&&s.active!==0&&s.isActive!==false&&s.is_active!==0;
+  return `<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="staff-avatar">${photo?`<img src="${escapeHTML(photo)}" alt="">`:escapeHTML(name.charAt(0).toUpperCase())}</div><div><b>${escapeHTML(name)}</b><br><span class="muted">${escapeHTML(s.email||'')}</span></div></div></td><td>${escapeHTML(s.username||'-')}</td><td>${escapeHTML(s.position||'-')}</td><td>${perms.length?perms.map(p=>`<span class="badge">${escapeHTML(p)}</span>`).join(' '):'<span class="muted">No permissions</span>'}</td><td><span class="badge ${active?'product-status-active':'product-status-inactive'}">${active?'Active':'Inactive'}</span></td><td><button class="btn small-btn" data-edit-staff="${escapeHTML(id)}">EDIT</button> <button class="delete-btn" data-delete-staff="${escapeHTML(id)}">DELETE</button></td></tr>`;
+ }).join('');
+ document.querySelectorAll('[data-edit-staff]').forEach(b=>b.addEventListener('click',()=>editStaff(b.dataset.editStaff)));
+ document.querySelectorAll('[data-delete-staff]').forEach(b=>b.addEventListener('click',()=>deleteStaff(b.dataset.deleteStaff)));
+}
+function renderPositionOptions(){
+ $('staffPosition').innerHTML='<option value="">Select position</option>'+positions.map(p=>`<option value="${escapeHTML(p.name)}">${escapeHTML(p.name)}</option>`).join('');
+}
+function renderPositions(){
+ if(!positions.length){$('positionList').innerHTML='<p class="muted">No positions created yet.</p>';return}
+ $('positionList').innerHTML=positions.map(p=>{
+  const id=p.id??p.positionId??p.position_id;
+  return `<div class="position-row"><b>${escapeHTML(p.name)}</b><button class="delete-btn small-btn" data-delete-position="${escapeHTML(id)}">DELETE</button></div>`;
+ }).join('');
+ document.querySelectorAll('[data-delete-position]').forEach(b=>b.addEventListener('click',()=>deletePosition(b.dataset.deletePosition)));
+}
+function clearStaffForm(){
+ $('staffForm').reset();$('staffEditId').value='';$('staffEditorTitle').textContent='Add Staff Member';
+ $('staffPasswordField').classList.remove('hidden');$('staffPassword').required=true;
+ $('staffPassword').value='';$('staffActive').value='true';$('staffFormMessage').textContent='';
+ editingStaffPhoto='';document.querySelectorAll('.staff-permission').forEach(c=>c.checked=false);
+}
+$('newStaffBtn').addEventListener('click',()=>{
+ clearStaffForm();$('staffEditorPanel').classList.remove('hidden');
+ $('staffEditorPanel').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('cancelStaffBtn').addEventListener('click',()=>{$('staffEditorPanel').classList.add('hidden');clearStaffForm()});
+function editStaff(id){
+ const s=staffList.find(x=>String(x.id??x.staffId??x.staff_id)===String(id));if(!s)return;
+ clearStaffForm();
+ $('staffEditId').value=id;$('staffEditorTitle').textContent='Edit Staff Member';
+ $('staffFullName').value=s.fullName||s.full_name||'';
+ $('staffUsername').value=s.username||'';
+ $('staffEmail').value=s.email||'';$('staffPhone').value=s.phone||'';
+ $('staffPosition').value=s.position||'';
+ $('staffActive').value=(s.active===false||s.active===0||s.isActive===false||s.is_active===0)?'false':'true';
+ $('staffPasswordField').classList.add('hidden');$('staffPassword').required=false;
+ editingStaffPhoto=s.profileImage||s.profile_image||'';
+ const perms=Array.isArray(s.permissions)?s.permissions:[];
+ document.querySelectorAll('.staff-permission').forEach(c=>c.checked=perms.includes(c.value));
+ $('staffEditorPanel').classList.remove('hidden');$('staffEditorPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function deleteStaff(id){
+ if(!confirm('Are you sure you want to delete this staff account?'))return;
+ try{await api(`/api/admin/staff/${encodeURIComponent(id)}`,{method:'DELETE'});alert('Staff account deleted.');loadStaffManagement()}
+ catch(e){alert(e.message)}
+}
+$('staffForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('staffFormMessage').textContent='';
+ const id=$('staffEditId').value;
+ const fullName=$('staffFullName').value.trim(),username=$('staffUsername').value.trim(),email=$('staffEmail').value.trim(),phone=$('staffPhone').value.trim(),position=$('staffPosition').value,password=$('staffPassword').value;
+ const permissions=[...document.querySelectorAll('.staff-permission:checked')].map(c=>c.value);
+ if(!fullName||!username||!position){$('staffFormMessage').textContent='Please complete Full Name, Username and Position.';return}
+ if(!id&&password.length<6){$('staffFormMessage').textContent='Initial password must contain at least 6 characters.';return}
+ if(!id&&!permissions.length){$('staffFormMessage').textContent='Please select at least one permission.';return}
+ if(!id&&staffList.some(s=>String(s.username).toLowerCase()===username.toLowerCase())){$('staffFormMessage').textContent='This username may already be in use.';return}
+ const button=$('saveStaffBtn');button.disabled=true;button.textContent='SAVING...';
+ try{
+  let profileImage=editingStaffPhoto;
+  const photoFile=$('staffPhoto').files[0];
+  if(photoFile){
+   if(!['image/jpeg','image/png','image/webp'].includes(photoFile.type))throw new Error('Profile photo must be JPG, PNG or WEBP.');
+   if(photoFile.size>2*1024*1024)throw new Error('Profile photo must be smaller than 2MB.');
+   profileImage=await fileToDataURL(photoFile);
+  }
+  const payload={fullName,username,email,phone,position,permissions,profileImage,active:$('staffActive').value==='true'};
+  if(!id)payload.password=password;
+  await api(id?`/api/admin/staff/${encodeURIComponent(id)}`:'/api/admin/staff',{method:id?'PUT':'POST',body:JSON.stringify(payload)});
+  alert(id?'Staff account updated successfully.':'Staff account created successfully.');
+  $('staffEditorPanel').classList.add('hidden');clearStaffForm();await loadStaffManagement();
+ }catch(err){$('staffFormMessage').textContent=err.message}
+ finally{button.disabled=false;button.textContent='SAVE STAFF'}
+});
+$('positionForm').addEventListener('submit',async e=>{
+ e.preventDefault();const name=$('newPositionName').value.trim();if(!name)return;
+ try{await api('/api/admin/staff/positions',{method:'POST',body:JSON.stringify({name})});$('newPositionName').value='';await loadStaffManagement();alert('Position added successfully.')}
+ catch(err){alert(err.message)}
+});
+async function deletePosition(id){
+ if(!confirm('Delete this position?'))return;
+ try{await api(`/api/admin/staff/positions/${encodeURIComponent(id)}`,{method:'DELETE'});await loadStaffManagement();alert('Position deleted.')}
+ catch(e){alert(e.message)}
+}
+
+/* PROFILE */
+async function loadProfile(){
+ try{
+  const result=await api('/api/admin/me');
+  if(result.account||result.admin||result.user)currentAccount=normaliseAccountResponse(result);
+  updateHeader();
+  const a=currentAccount||{},name=a.fullName||a.full_name||a.username||'Admin';
+  $('profileFullName').value=a.fullName||a.full_name||'';
+  $('profileUsername').value=a.username||'';
+  $('profileEmail').value=a.email||'';
+  $('profilePhone').value=a.phone||'';
+  $('profileDisplayName').textContent=name;
+  $('profileDisplayPosition').textContent=a.position||(isChairman()?'Chairman':'Staff');
+  $('profileAccountType').textContent=isChairman()?'Chairman':'Staff Account';
+  const photo=a.profileImage||a.profile_image||'';
+  $('profileAvatar').innerHTML=photo?`<img class="profile-photo" src="${escapeHTML(photo)}" alt="Profile photo">`:escapeHTML(name.charAt(0).toUpperCase());
+ }catch(e){$('profileMessage').textContent=e.message}
+}
+$('profileForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('profileMessage').textContent='';
+ const button=$('saveProfileBtn');button.disabled=true;button.textContent='SAVING...';
+ try{
+  const payload={fullName:$('profileFullName').value.trim(),username:$('profileUsername').value.trim(),email:$('profileEmail').value.trim(),phone:$('profilePhone').value.trim()};
+  const photo=$('profilePhoto').files[0];
+  if(photo){
+   if(!['image/jpeg','image/png','image/webp'].includes(photo.type))throw new Error('Profile photo must be JPG, PNG or WEBP.');
+   if(photo.size>2*1024*1024)throw new Error('Profile photo must be smaller than 2MB.');
+   payload.profileImage=await fileToDataURL(photo);
+  }
+  await api('/api/admin/profile',{method:'PATCH',body:JSON.stringify(payload)});
+  const me=await api('/api/admin/me');currentAccount=normaliseAccountResponse(me)||currentAccount;
+  updateHeader();await loadProfile();$('profilePhoto').value='';
+  $('profileMessage').style.color='green';$('profileMessage').textContent='Profile updated successfully.';
+ }catch(err){$('profileMessage').style.color='#b33';$('profileMessage').textContent=err.message}
+ finally{button.disabled=false;button.textContent='SAVE PROFILE'}
+});
+$('passwordForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('passwordMessage').textContent='';$('passwordMessage').style.color='#b33';
+ const currentPassword=$('currentPassword').value,newPassword=$('newPassword').value,confirmPassword=$('confirmPassword').value;
+ if(newPassword.length<8){$('passwordMessage').textContent='New password must contain at least 8 characters.';return}
+ if(newPassword!==confirmPassword){$('passwordMessage').textContent='New password and confirmation do not match.';return}
+ try{
+  await api('/api/admin/profile/password',{method:'PATCH',body:JSON.stringify({currentPassword,newPassword})});
+  $('passwordForm').reset();$('passwordMessage').style.color='green';$('passwordMessage').textContent='Password changed successfully.';
+ }catch(err){$('passwordMessage').textContent=err.message}
+});
+
+/* START */
+checkLogin();
+</script>
+</body>
+</html>

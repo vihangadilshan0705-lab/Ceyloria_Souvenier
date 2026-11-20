@@ -1,0 +1,899 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details | Ceyloria</title>
+
+<style>
+:root {
+  --navy:#10243d;
+  --navy2:#183654;
+  --gold:#d4ad58;
+  --cream:#f8f5ee;
+  --text:#263445;
+  --muted:#718096;
+  --red:#c62828;
+  --green:#16834a;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:Arial,sans-serif;
+  background:var(--cream);
+  color:var(--text);
+}
+
+header{
+  background:var(--navy);
+  color:white;
+  padding:18px 6%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.logo{
+  font-size:25px;
+  font-weight:bold;
+  color:var(--gold);
+  letter-spacing:1px;
+}
+
+.header-links{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.header-links a{
+  color:white;
+  text-decoration:none;
+  border:1px solid var(--gold);
+  padding:10px 15px;
+  border-radius:6px;
+}
+
+.header-links a:hover{
+  background:var(--gold);
+  color:var(--navy);
+}
+
+.cart-count{
+  background:var(--gold);
+  color:var(--navy);
+  border-radius:50%;
+  padding:3px 7px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.container{
+  max-width:1150px;
+  margin:40px auto;
+  padding:0 20px;
+}
+
+.product-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:45px;
+  background:white;
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 5px 25px rgba(0,0,0,.07);
+}
+
+.main-image{
+  width:100%;
+  height:430px;
+  object-fit:contain;
+  background:#f7f7f7;
+  border-radius:10px;
+}
+
+.gallery{
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+  flex-wrap:wrap;
+}
+
+.gallery img{
+  width:75px;
+  height:75px;
+  object-fit:cover;
+  border:2px solid #ddd;
+  border-radius:7px;
+  cursor:pointer;
+}
+
+.gallery img.active{border-color:var(--gold)}
+
+.product-info{padding:10px 0}
+
+.category{
+  color:#a17a2d;
+  font-size:13px;
+  font-weight:bold;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+
+.product-name{
+  color:var(--navy);
+  font-size:32px;
+  margin-bottom:18px;
+}
+
+.description{
+  line-height:1.8;
+  color:#667085;
+  margin-bottom:25px;
+  white-space:pre-wrap;
+}
+
+.price-area{
+  margin:15px 0 25px;
+}
+
+.price{
+  font-size:29px;
+  color:var(--navy);
+  font-weight:bold;
+}
+
+.old-price{
+  font-size:19px;
+  color:#929292;
+  text-decoration:line-through;
+  margin-left:10px;
+}
+
+.discount-badge{
+  display:inline-block;
+  background:#fff0ed;
+  color:#c62828;
+  padding:6px 10px;
+  border-radius:5px;
+  font-size:13px;
+  font-weight:bold;
+  margin-top:9px;
+}
+
+.field{margin:20px 0}
+
+.field label{
+  display:block;
+  font-weight:bold;
+  margin-bottom:10px;
+  color:var(--navy);
+}
+
+select,input{
+  width:100%;
+  padding:13px;
+  border:1px solid #ddd;
+  border-radius:7px;
+  font-size:15px;
+  outline:none;
+  background:white;
+}
+
+select:focus,input:focus{border-color:var(--gold)}
+
+.quantity-box{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.quantity-box button{
+  width:40px;
+  height:40px;
+  border:none;
+  background:var(--navy);
+  color:white;
+  font-size:20px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.quantity-box button:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+.quantity-box input{
+  width:75px;
+  text-align:center;
+}
+
+.stock-text{
+  margin-top:9px;
+  font-size:14px;
+  color:var(--green);
+  font-weight:bold;
+}
+
+.stock-text.out{
+  color:var(--red);
+}
+
+.actions{
+  display:flex;
+  gap:12px;
+  margin-top:30px;
+  flex-wrap:wrap;
+}
+
+.action-btn{
+  flex:1;
+  min-width:140px;
+  padding:15px;
+  border:none;
+  border-radius:7px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.cart-btn{background:var(--navy);color:white}
+.buy-btn{background:var(--gold);color:var(--navy)}
+
+.action-btn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 5px 15px rgba(0,0,0,.15);
+}
+
+.action-btn:disabled{
+  background:#aaa;
+  color:white;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+
+.message{
+  margin-top:15px;
+  color:var(--green);
+  font-weight:bold;
+  display:none;
+}
+
+.loading,.error{
+  text-align:center;
+  padding:80px 20px;
+  font-size:18px;
+}
+
+.error{color:#b42318}
+
+footer{
+  text-align:center;
+  padding:25px;
+  margin-top:50px;
+  background:var(--navy);
+  color:white;
+}
+
+@media(max-width:750px){
+  .product-layout{
+    grid-template-columns:1fr;
+    padding:18px;
+    gap:25px;
+  }
+
+  .main-image{height:320px}
+  .product-name{font-size:25px}
+  .container{margin:20px auto}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">CEYLORIA</div>
+
+  <div class="header-links">
+    <a href="products.html">← Products</a>
+    <a href="cart.html">
+      🛒 Cart <span class="cart-count" id="cartCount">0</span>
+    </a>
+  </div>
+</header>
+
+<main class="container">
+
+  <div id="loading" class="loading">Loading product...</div>
+
+  <div id="error" class="error" style="display:none"></div>
+
+  <div id="productArea" class="product-layout" style="display:none">
+
+    <div>
+      <img id="mainImage" class="main-image" alt="Product image">
+      <div id="gallery" class="gallery"></div>
+    </div>
+
+    <div class="product-info">
+
+      <div id="category" class="category"></div>
+
+      <h1 id="productName" class="product-name"></h1>
+
+      <div id="description" class="description"></div>
+
+      <div class="field" id="sizeField" style="display:none">
+        <label for="sizeSelect">Select Size</label>
+        <select id="sizeSelect"></select>
+      </div>
+
+      <div class="price-area">
+        <div>
+          <span id="price" class="price"></span>
+          <span id="oldPrice" class="old-price" style="display:none"></span>
+        </div>
+        <div id="discountBadge" class="discount-badge" style="display:none"></div>
+      </div>
+
+      <div class="field">
+        <label>Quantity</label>
+
+        <div class="quantity-box">
+          <button type="button" id="minusBtn" onclick="changeQuantity(-1)">−</button>
+
+          <input type="number" id="quantity"
+            value="1" min="1" max="99">
+
+          <button type="button" id="plusBtn" onclick="changeQuantity(1)">+</button>
+        </div>
+
+        <div id="stockText" class="stock-text"></div>
+      </div>
+
+      <div class="actions">
+        <button class="action-btn cart-btn" id="cartBtn" onclick="addToCart(false)">
+          🛒 Add to Cart
+        </button>
+
+        <button class="action-btn buy-btn" id="buyBtn" onclick="addToCart(true)">
+          Buy Now →
+        </button>
+      </div>
+
+      <div id="message" class="message"></div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  © 2026 Ceyloria Souvenirs. All Rights Reserved.
+</footer>
+
+<script>
+let currentProduct = null;
+let selectedSize = null;
+
+const params = new URLSearchParams(window.location.search);
+const productId = params.get("id");
+
+const CART_KEY = "ceyloriaCart";
+
+function getProductId(product){
+  return String(product.id ?? product.productId ?? "");
+}
+
+function getProductName(product){
+  return product.name || product.title || "Product";
+}
+
+function getDescription(product){
+  return product.description || "No description available.";
+}
+
+function getField(product, names){
+  for(const name of names){
+    if(product[name] !== undefined && product[name] !== null && product[name] !== ""){
+      return product[name];
+    }
+  }
+  return null;
+}
+
+function getProductImages(product){
+  let images=[];
+
+  if(Array.isArray(product.images)){
+    images=product.images.map(item=>{
+      if(typeof item==="string") return item;
+      return item.url || item.image || item.src || item.path || "";
+    });
+  }
+
+  if(product.image) images.unshift(product.image);
+  if(product.imageUrl) images.unshift(product.imageUrl);
+  if(product.image_url) images.unshift(product.image_url);
+
+  return [...new Set(images.filter(Boolean))];
+}
+
+function getSizes(product){
+  let sizes=product.sizes || product.sizePrices || product.size_prices || [];
+
+  if(typeof sizes==="string"){
+    try{sizes=JSON.parse(sizes)}
+    catch{sizes=[]}
+  }
+
+  if(!Array.isArray(sizes)) return [];
+
+  return sizes.map(item=>{
+    if(typeof item==="string"){
+      return {
+        size:item,
+        price:Number(product.price || 0),
+        discountPrice:null
+      };
+    }
+
+    return {
+      size:item.size || item.name || item.label || "",
+      price:Number(item.price ?? product.price ?? 0),
+      discountPrice:getField(item,["discountPrice","discount_price","salePrice","sale_price"])
+    };
+  }).filter(item=>item.size);
+}
+
+function money(value){
+  return "Rs. "+Number(value || 0).toLocaleString("en-LK",{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+}
+
+function getStock(product){
+  const value=getField(product,[
+    "stockQuantity",
+    "stock_quantity",
+    "stock",
+    "quantity"
+  ]);
+
+  // Legacy products without a stock field
+  // remain available until stock is configured.
+  if(value===null) return 99;
+
+  const number=Number(value);
+  return Number.isFinite(number) ? Math.max(0,Math.floor(number)) : 0;
+}
+
+function isProductActive(product){
+  const status=String(product.status || "").toLowerCase();
+
+  if(status==="inactive" || status==="disabled") return false;
+
+  if(product.active===false || product.active===0 || product.active==="0"){
+    return false;
+  }
+
+  return true;
+}
+
+function showError(message){
+  document.getElementById("loading").style.display="none";
+  document.getElementById("productArea").style.display="none";
+
+  const error=document.getElementById("error");
+  error.textContent=message;
+  error.style.display="block";
+}
+
+async function loadProduct(){
+  if(!productId){
+    showError("Product ID not found.");
+    return;
+  }
+
+  try{
+    const response=await fetch("/api/products",{
+      credentials:"same-origin"
+    });
+
+    if(!response.ok){
+      throw new Error("Could not load products.");
+    }
+
+    const data=await response.json();
+
+    const products=Array.isArray(data)
+      ? data
+      : (data.products || data.items || []);
+
+    currentProduct=products.find(
+      product=>getProductId(product)===String(productId)
+    );
+
+    if(!currentProduct){
+      showError("Product not found. It may have been removed or is unavailable.");
+      return;
+    }
+
+    if(!isProductActive(currentProduct)){
+      showError("This product is currently unavailable.");
+      return;
+    }
+
+    displayProduct();
+
+  }catch(error){
+    console.error(error);
+    showError("Unable to load product. Please try again.");
+  }
+}
+
+function displayProduct(){
+  const product=currentProduct;
+
+  document.getElementById("loading").style.display="none";
+  document.getElementById("productArea").style.display="grid";
+
+  document.title=getProductName(product)+" | Ceyloria";
+
+  document.getElementById("productName").textContent=getProductName(product);
+
+  document.getElementById("description").textContent=getDescription(product);
+
+  document.getElementById("category").textContent=
+    product.categoryName ||
+    product.category ||
+    product.mainCategory ||
+    "CEYLORIA COLLECTION";
+
+  const images=getProductImages(product);
+  const mainImage=document.getElementById("mainImage");
+  const gallery=document.getElementById("gallery");
+
+  if(images.length){
+    mainImage.src=images[0];
+
+    mainImage.onerror=()=>{
+      mainImage.alt="Product image unavailable";
+    };
+
+    gallery.innerHTML="";
+
+    images.forEach((image,index)=>{
+      const thumbnail=document.createElement("img");
+
+      thumbnail.src=image;
+      thumbnail.alt="Product image "+(index+1);
+
+      if(index===0) thumbnail.classList.add("active");
+
+      thumbnail.addEventListener("click",()=>{
+        mainImage.src=image;
+
+        gallery.querySelectorAll("img").forEach(img=>
+          img.classList.remove("active")
+        );
+
+        thumbnail.classList.add("active");
+      });
+
+      gallery.appendChild(thumbnail);
+    });
+
+  }else{
+    mainImage.removeAttribute("src");
+    mainImage.alt="No product image available";
+  }
+
+  const sizes=getSizes(product);
+  const sizeField=document.getElementById("sizeField");
+  const sizeSelect=document.getElementById("sizeSelect");
+
+  if(sizes.length){
+    sizeField.style.display="block";
+    sizeSelect.innerHTML="";
+
+    sizes.forEach((item,index)=>{
+      const option=document.createElement("option");
+      option.value=String(index);
+      option.textContent=item.size+" — "+money(item.price);
+      sizeSelect.appendChild(option);
+    });
+
+    selectedSize=sizes[0];
+
+    sizeSelect.onchange=updateSelectedSize;
+
+  }else{
+    sizeField.style.display="none";
+    selectedSize=null;
+  }
+
+  updatePrice();
+  updateStockDisplay();
+  updateCartCount();
+}
+
+function updateSelectedSize(){
+  const sizes=getSizes(currentProduct);
+  const index=Number(document.getElementById("sizeSelect").value);
+
+  selectedSize=sizes[index] || null;
+
+  updatePrice();
+}
+
+function getRegularPrice(){
+  if(selectedSize){
+    return Number(selectedSize.price || 0);
+  }
+
+  return Number(currentProduct.price || 0);
+}
+
+function getDiscountPrice(){
+  let value=null;
+
+  if(selectedSize && selectedSize.discountPrice!==null){
+    value=Number(selectedSize.discountPrice);
+  }else if(!selectedSize){
+    value=getField(currentProduct,[
+      "discountPrice",
+      "discount_price",
+      "salePrice",
+      "sale_price"
+    ]);
+  }
+
+  if(value===null) return null;
+
+  value=Number(value);
+
+  if(!Number.isFinite(value) || value<=0) return null;
+
+  if(value>=getRegularPrice()) return null;
+
+  return value;
+}
+
+function getSelectedPrice(){
+  const discount=getDiscountPrice();
+
+  return discount!==null ? discount : getRegularPrice();
+}
+
+function updatePrice(){
+  const priceElement=document.getElementById("price");
+  const oldPriceElement=document.getElementById("oldPrice");
+  const badge=document.getElementById("discountBadge");
+
+  const regularPrice=getRegularPrice();
+  const discountPrice=getDiscountPrice();
+
+  priceElement.textContent=money(
+    discountPrice!==null ? discountPrice : regularPrice
+  );
+
+  if(discountPrice!==null){
+    oldPriceElement.textContent=money(regularPrice);
+    oldPriceElement.style.display="inline";
+
+    const percentage=Math.round(
+      ((regularPrice-discountPrice)/regularPrice)*100
+    );
+
+    badge.textContent=percentage+"% OFF";
+    badge.style.display="inline-block";
+
+  }else{
+    oldPriceElement.style.display="none";
+    badge.style.display="none";
+  }
+}
+
+function updateStockDisplay(){
+  const stock=getStock(currentProduct);
+
+  const quantityInput=document.getElementById("quantity");
+  const stockText=document.getElementById("stockText");
+
+  const minusBtn=document.getElementById("minusBtn");
+  const plusBtn=document.getElementById("plusBtn");
+
+  const cartBtn=document.getElementById("cartBtn");
+  const buyBtn=document.getElementById("buyBtn");
+
+  quantityInput.max=String(stock);
+
+  if(stock<=0){
+    quantityInput.value=1;
+    quantityInput.disabled=true;
+
+    stockText.textContent="Out of Stock";
+    stockText.classList.add("out");
+
+    minusBtn.disabled=true;
+    plusBtn.disabled=true;
+    cartBtn.disabled=true;
+    buyBtn.disabled=true;
+
+    cartBtn.textContent="Out of Stock";
+    buyBtn.textContent="Unavailable";
+
+    return;
+  }
+
+  quantityInput.disabled=false;
+  quantityInput.value=Math.min(
+    Math.max(1,Number(quantityInput.value)||1),
+    stock
+  );
+
+  stockText.classList.remove("out");
+  stockText.textContent=stock+" available";
+
+  minusBtn.disabled=false;
+  plusBtn.disabled=false;
+  cartBtn.disabled=false;
+  buyBtn.disabled=false;
+
+  cartBtn.textContent="🛒 Add to Cart";
+  buyBtn.textContent="Buy Now →";
+}
+
+function changeQuantity(amount){
+  const input=document.getElementById("quantity");
+  const stock=getStock(currentProduct);
+
+  let value=Number(input.value || 1);
+
+  value=Math.max(1,Math.min(stock,value+amount));
+
+  input.value=value;
+}
+
+document.getElementById("quantity").addEventListener("change",function(){
+  if(!currentProduct) return;
+
+  const stock=getStock(currentProduct);
+
+  let value=Math.floor(Number(this.value)||1);
+
+  this.value=Math.max(1,Math.min(stock,value));
+});
+
+function getCart(){
+  try{
+    const cart=JSON.parse(localStorage.getItem(CART_KEY)||"[]");
+    return Array.isArray(cart)?cart:[];
+  }catch{
+    return [];
+  }
+}
+
+function updateCartCount(){
+  const cart=getCart();
+
+  const count=cart.reduce((sum,item)=>{
+    return sum+Number(item.qty || item.quantity || 0);
+  },0);
+
+  document.getElementById("cartCount").textContent=count;
+}
+
+// ADD TO CART / BUY NOW
+function addToCart(goToCart){
+  if(!currentProduct) return;
+
+  if(!isProductActive(currentProduct)){
+    alert("This product is currently unavailable.");
+    return;
+  }
+
+  const stock=getStock(currentProduct);
+
+  if(stock<=0){
+    alert("Sorry, this product is out of stock.");
+    return;
+  }
+
+  const quantityInput=document.getElementById("quantity");
+
+  const quantity=Math.floor(Number(quantityInput.value)||1);
+
+  if(quantity<1 || quantity>stock){
+    alert("Only "+stock+" items are available.");
+    quantityInput.value=Math.min(Math.max(1,quantity),stock);
+    return;
+  }
+
+  const id=getProductId(currentProduct);
+  const productName=getProductName(currentProduct);
+  const price=getSelectedPrice();
+  const regularPrice=getRegularPrice();
+  const size=selectedSize?selectedSize.size:"";
+  const images=getProductImages(currentProduct);
+
+  const cart=getCart();
+
+  const existing=cart.find(item=>
+    String(item.id || item.productId)===id &&
+    String(item.size || "")===size
+  );
+
+  const alreadyInCart=existing
+    ? Number(existing.qty || existing.quantity || 0)
+    : 0;
+
+  if(alreadyInCart+quantity>stock){
+    alert("You already have "+alreadyInCart+
+      " in your cart. Only "+stock+" items are available in total.");
+
+    return;
+  }
+
+  if(existing){
+    existing.qty=alreadyInCart+quantity;
+    existing.quantity=existing.qty;
+    existing.price=price;
+    existing.originalPrice=regularPrice;
+    existing.discountPrice=price<regularPrice?price:null;
+    existing.name=productName;
+    existing.title=productName;
+    existing.image=images[0] || existing.image || "";
+    existing.stockQuantity=stock;
+
+  }else{
+    cart.push({
+      id:currentProduct.id,
+      productId:currentProduct.id,
+      name:productName,
+      title:productName,
+      price:price,
+      originalPrice:regularPrice,
+      discountPrice:price<regularPrice?price:null,
+      size:size,
+      quantity:quantity,
+      qty:quantity,
+      image:images[0] || "",
+      stockQuantity:stock
+    });
+  }
+
+  localStorage.setItem(CART_KEY,JSON.stringify(cart));
+
+  updateCartCount();
+
+  if(goToCart){
+    window.location.href="cart.html";
+    return;
+  }
+
+  const message=document.getElementById("message");
+
+  message.textContent="✓ Added to cart successfully!";
+  message.style.display="block";
+
+  setTimeout(()=>{
+    message.style.display="none";
+  },3000);
+}
+
+loadProduct();
+</script>
+
+</body>
+</html>

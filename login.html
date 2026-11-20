@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Login | Ceyloria</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f3ee;color:#10243d}
+header{background:#10243d;color:white;padding:22px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;letter-spacing:3px;font-weight:bold}
+header a{color:#e2c276;text-decoration:none}
+main{max-width:460px;margin:45px auto;padding:0 16px}
+.card{background:white;padding:30px;border-radius:14px;box-shadow:0 8px 30px #10243d15}
+h1{text-align:center;margin:0 0 8px}
+.sub{text-align:center;color:#77808c;font-size:14px;margin-bottom:25px}
+.tabs{display:flex;gap:8px;margin-bottom:20px}
+.tabs button{flex:1;padding:12px;border:1px solid #d8dce0;background:white;border-radius:7px;cursor:pointer;font-weight:bold}
+.tabs button.active{background:#10243d;color:white}
+label{display:block;font-size:13px;font-weight:bold;margin:14px 0 7px}
+input{width:100%;padding:12px;border:1px solid #d5dbe2;border-radius:7px;font-size:15px}
+.submit{width:100%;margin-top:22px;padding:14px;background:#b58a36;color:white;border:0;border-radius:7px;font-weight:bold;font-size:15px;cursor:pointer}
+.submit:disabled{opacity:.6}
+.message{font-size:14px;margin-top:15px;text-align:center}\n.forgot-link{display:block;text-align:right;margin-top:12px;color:#9a742c;font-size:13px;text-decoration:none;font-weight:bold}\n.back-link{display:inline-block;margin-top:14px;color:#9a742c;text-decoration:none;font-size:13px;font-weight:bold}
+.error{color:#b3261e}.success{color:#167344}
+.hidden{display:none}
+footer{text-align:center;color:#89909a;font-size:13px;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">CEYLORIA</div>
+<a href="/">Back to Store</a>
+</header>
+
+<main>
+<div class="card">
+<h1>Welcome to Ceyloria</h1>
+<p class="sub">Login or create your customer account.</p>
+
+<div class="tabs">
+<button type="button" id="loginTab" class="active">Login</button>
+<button type="button" id="registerTab">Register</button>
+</div>
+
+<form id="loginForm">
+<label>Email Address</label>
+<input type="email" id="loginEmail" required>
+<label>Password</label>
+<input type="password" id="loginPassword" required>
+<button class="submit" type="submit">LOGIN</button>
+</form>
+<a href="#" id="forgotLink" class="forgot-link">Forgot Password?</a>
+
+<form id="forgotForm" class="hidden">
+<label>Email Address</label>
+<input type="email" id="forgotEmail" autocomplete="email" required>
+<button class="submit" type="submit">SEND RESET LINK</button>
+<a href="#" id="backToLoginFromForgot" class="back-link">Back to Login</a>
+</form>
+
+<form id="resetForm" class="hidden">
+<label>New Password (Minimum 6 characters)</label>
+<input type="password" id="resetPassword" minlength="6" autocomplete="new-password" required>
+<label>Confirm New Password</label>
+<input type="password" id="confirmResetPassword" minlength="6" autocomplete="new-password" required>
+<button class="submit" type="submit">SAVE NEW PASSWORD</button>
+<a href="/login.html" id="backToLoginFromReset" class="back-link">Back to Login</a>
+</form>
+
+<form id="registerForm" class="hidden">
+<label>Full Name</label>
+<input type="text" id="regName" required>
+<label>Phone Number</label>
+<input type="tel" id="regPhone" required>
+<label>Email Address</label>
+<input type="email" id="regEmail" required>
+<label>Delivery Address</label>
+<input type="text" id="regAddress" required>
+<label>Password (Minimum 6 characters)</label>
+<input type="password" id="regPassword" minlength="6" required>
+<button class="submit" type="submit">CREATE ACCOUNT</button>
+</form>
+
+<div id="message" class="message"></div>
+</div>
+</main>
+
+<footer>© 2026 Ceyloria Souvenirs | Made with ❤️ in Sri Lanka</footer>
+
+<script>
+const loginForm=document.getElementById('loginForm');
+const registerForm=document.getElementById('registerForm');
+const loginTab=document.getElementById('loginTab');
+const registerTab=document.getElementById('registerTab');
+const forgotForm=document.getElementById('forgotForm');
+const resetForm=document.getElementById('resetForm');
+const forgotLink=document.getElementById('forgotLink');
+const message=document.getElementById('message');
+const resetToken=new URLSearchParams(window.location.search).get('reset');
+
+function hideExtraForms(){
+  forgotForm.classList.add('hidden');
+  resetForm.classList.add('hidden');
+  forgotLink.classList.remove('hidden');
+}
+
+function showTab(tab){
+  hideExtraForms();
+  document.querySelector('.tabs').classList.remove('hidden');
+  message.textContent='';
+  if(tab==='login'){
+    forgotLink.classList.remove('hidden');
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+  }else{
+    forgotLink.classList.add('hidden');
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+    loginTab.classList.remove('active');
+    registerTab.classList.add('active');
+  }
+}
+
+loginTab.addEventListener('click',()=>showTab('login'));
+registerTab.addEventListener('click',()=>showTab('register'));
+
+forgotLink.addEventListener('click', event => {
+  event.preventDefault();
+  loginForm.classList.add('hidden');
+  registerForm.classList.add('hidden');
+  resetForm.classList.add('hidden');
+  forgotForm.classList.remove('hidden');
+  forgotLink.classList.add('hidden');
+  document.querySelector('.tabs').classList.add('hidden');
+  message.textContent='';
+  document.getElementById('forgotEmail').value =
+    document.getElementById('loginEmail').value;
+});
+
+document.getElementById('backToLoginFromForgot').addEventListener('click', event => {
+  event.preventDefault();
+  showTab('login');
+});
+
+async function sendRequest(url,body){
+  const response=await fetch(url,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  const data=await response.json();
+  if(!response.ok) throw new Error(data.error||'Something went wrong.');
+  return data;
+}
+
+loginForm.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const button=loginForm.querySelector('button');
+  button.disabled=true;
+  message.textContent='Logging in...';
+  message.className='message';
+
+  try{
+    await sendRequest('/api/auth/login',{
+      email:document.getElementById('loginEmail').value,
+      password:document.getElementById('loginPassword').value
+    });
+    message.textContent='Login successful!';
+    message.className='message success';
+    window.location.href='/account.html';
+  }catch(error){
+    message.textContent=error.message;
+    message.className='message error';
+  }
+  button.disabled=false;
+});
+
+forgotForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const button = forgotForm.querySelector('button');
+  button.disabled = true;
+  message.textContent = 'Sending reset link...';
+  message.className = 'message';
+
+  try {
+    const result = await sendRequest('/api/auth/forgot-password', {
+      email: document.getElementById('forgotEmail').value
+    });
+    message.textContent = result.message ||
+      'If an account exists for that email, a password reset link will be sent.';
+    message.className = 'message success';
+    forgotForm.reset();
+  } catch (error) {
+    message.textContent = error.message;
+    message.className = 'message error';
+  }
+
+  button.disabled = false;
+});
+
+resetForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const password = document.getElementById('resetPassword').value;
+  const confirmPassword = document.getElementById('confirmResetPassword').value;
+
+  if (password !== confirmPassword) {
+    message.textContent = 'The passwords do not match.';
+    message.className = 'message error';
+    return;
+  }
+
+  const button = resetForm.querySelector('button');
+  button.disabled = true;
+  message.textContent = 'Updating password...';
+  message.className = 'message';
+
+  try {
+    const result = await sendRequest('/api/auth/reset-password', {
+      token: resetToken,
+      password
+    });
+    message.textContent = result.message || 'Password updated. Please log in.';
+    message.className = 'message success';
+    resetForm.reset();
+    resetForm.classList.add('hidden');
+    document.querySelector('.tabs').classList.remove('hidden');
+    forgotLink.classList.remove('hidden');
+    history.replaceState({}, document.title, '/login.html');
+    showTab('login');
+  } catch (error) {
+    message.textContent = error.message;
+    message.className = 'message error';
+  }
+
+  button.disabled = false;
+});
+
+registerForm.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const button=registerForm.querySelector('button');
+  button.disabled=true;
+  message.textContent='Creating your account...';
+  message.className='message';
+
+  try{
+    await sendRequest('/api/auth/register',{
+      name:document.getElementById('regName').value,
+      phone:document.getElementById('regPhone').value,
+      email:document.getElementById('regEmail').value,
+      address:document.getElementById('regAddress').value,
+      password:document.getElementById('regPassword').value
+    });
+    message.textContent='Account created successfully!';
+    message.className='message success';
+    window.location.href='/account.html';
+  }catch(error){
+    message.textContent=error.message;
+    message.className='message error';
+  }
+  button.disabled=false;
+});
+
+if (resetToken) {
+  loginForm.classList.add('hidden');
+  registerForm.classList.add('hidden');
+  forgotForm.classList.add('hidden');
+  resetForm.classList.remove('hidden');
+  forgotLink.classList.add('hidden');
+  document.querySelector('.tabs').classList.add('hidden');
+  message.textContent = 'Choose a new password for your account.';
+  message.className = 'message';
+}
+
+(async()=>{
+  try{
+    const response=await fetch('/api/auth/me');
+    const data=await response.json();
+    if(data.loggedIn && data.customer && !resetToken){
+      window.location.href='/account.html';
+    }
+  }catch(error){}
+})();
+</script>
+</body>
+</html>
