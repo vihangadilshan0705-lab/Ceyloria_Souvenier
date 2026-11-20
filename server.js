@@ -654,58 +654,26 @@ const trackLimiter = rateLimit({
 // =====================================
 
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
-const BREVO_SENDER_EMAIL = 'ceyloriasouvenirs@gmail.com';
-const BREVO_SENDER_NAME = 'Ceyloria Souvenirs';
+const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || 'ceyloriasouvenirs@gmail.com';
+const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || 'Ceyloria Souvenirs';
 
-const ownerEmail = process.env.OWNER_EMAIL ||
-  'vihangadilshan0705@gmail.com';
+const ownerEmail = process.env.OWNER_EMAIL || 'ceyloriasouvenirs@gmail.com';
 
 const baseUrl = (
   process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`
 ).replace(/\/$/, '');
 
 function emailConfigured() {
-  return Boolean(
-    process.env.BREVO_API_KEY
-  );
+  return Boolean(process.env.BREVO_API_KEY);
 }
 
 async function sendMail(options) {
   if (!emailConfigured()) {
-    console.log(
-      'EMAIL NOT CONFIGURED: Check BREVO_API_KEY in Render Environment Variables.'
-    );
+    console.log('EMAIL NOT CONFIGURED: Check BREVO_API_KEY in Render Environment Variables.');
     return false;
   }
 
   try {
-    const recipients = Array.isArray(options.to)
-      ? options.to.map(recipient => {
-          if (typeof recipient === 'string') {
-            return { email: recipient };
-          }
-
-          return {
-            email: recipient.email,
-            ...(recipient.name ? { name: recipient.name } : {})
-          };
-        })
-      : [{ email: options.to }];
-
-    const payload = {
-      sender: {
-        name: BREVO_SENDER_NAME,
-        email: BREVO_SENDER_EMAIL
-      },
-      to: recipients,
-      subject: String(options.subject || ''),
-      htmlContent: String(options.html || options.htmlContent || '')
-    };
-
-    if (options.text) {
-      payload.textContent = String(options.text);
-    }
-
     const response = await fetch(BREVO_API_URL, {
       method: 'POST',
       headers: {
@@ -713,22 +681,22 @@ async function sendMail(options) {
         'api-key': process.env.BREVO_API_KEY,
         'content-type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        sender: {
+          name: BREVO_SENDER_NAME,
+          email: BREVO_SENDER_EMAIL
+        },
+        to: [{ email: options.to }],
+        subject: options.subject,
+        htmlContent: options.html
+      })
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      let details = '';
-
-      try {
-        const errorBody = await response.text();
-        details = errorBody ? ` - ${errorBody}` : '';
-      } catch (_) {
-        // Ignore response parsing errors and keep the HTTP status.
-      }
-
-      throw new Error(
-        `Brevo API ${response.status} ${response.statusText}${details}`
-      );
+      console.error('Brevo email error:', response.status, responseText);
+      return false;
     }
 
     return true;
@@ -2162,13 +2130,42 @@ async function sendOrderEmails(row, data, invoiceUrl, trackingUrl) {
   return { ownerSent, customerSent };
 }
 
-// =====================================
-// CREATE ORDER
-// =====================================
 
 app.post('/api/orders', async (req, res) => {
   try {
     const body = req.body || {};
+
+    const incomingCustomer = body.customer && typeof body.customer === 'object'
+      ? body.customer
+      : {};
+
+    const customer = {
+      name: String(
+        incomingCustomer.name ?? body.name ?? body.customerName ?? ''
+      ).trim(),
+      phone: String(
+        incomingCustomer.phone ?? body.phone ?? ''
+      ).trim(),
+      email: String(
+        incomingCustomer.email ?? body.email ?? ''
+      ).trim().toLowerCase(),
+      address: String(
+        incomingCustomer.address ?? body.address ?? ''
+      ).trim()
+    };
+
+    if (!customer.name || !customer.phone || !customer.email || !customer.address) {
+      return res.status(400).json({
+        error: 'Please complete your name, phone, email and address.'
+      });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) {
+      return res.status(400).json({
+        error: 'Please enter a valid email address.'
+      });
+    }
+
     const items = Array.isArray(body.items) ? body.items : [];
 
     if (!items.length) {
