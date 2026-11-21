@@ -388,6 +388,7 @@ const params = new URLSearchParams(window.location.search);
 const productId = params.get("id");
 
 const CART_KEY = "ceyloriaCart";
+const BUY_NOW_KEY = "ceyloriaBuyNow";
 
 function getProductId(product){
   return String(product.id ?? product.productId ?? "");
@@ -469,8 +470,6 @@ function getStock(product){
     "quantity"
   ]);
 
-  // Legacy products without a stock field
-  // remain available until stock is configured.
   if(value===null) return 99;
 
   const number=Number(value);
@@ -756,6 +755,9 @@ function updateStockDisplay(){
 
 function changeQuantity(amount){
   const input=document.getElementById("quantity");
+
+  if(!currentProduct) return;
+
   const stock=getStock(currentProduct);
 
   let value=Number(input.value || 1);
@@ -788,14 +790,46 @@ function updateCartCount(){
   const cart=getCart();
 
   const count=cart.reduce((sum,item)=>{
-    return sum+Number(item.qty || item.quantity || 0);
+    return sum+Number(item.qty ?? item.quantity ?? 0);
   },0);
 
   document.getElementById("cartCount").textContent=count;
 }
 
-// ADD TO CART / BUY NOW
+/*
+  BUILD A STANDARD PRODUCT ITEM
+*/
+
+function buildCartItem(quantity){
+  const id=getProductId(currentProduct);
+  const productName=getProductName(currentProduct);
+  const price=getSelectedPrice();
+  const regularPrice=getRegularPrice();
+  const size=selectedSize?selectedSize.size:"";
+  const images=getProductImages(currentProduct);
+
+  return {
+    id:id,
+    productId:id,
+    name:productName,
+    title:productName,
+    price:price,
+    originalPrice:regularPrice,
+    discountPrice:price<regularPrice?price:null,
+    size:size,
+    quantity:quantity,
+    qty:quantity,
+    image:images[0] || "",
+    stockQuantity:getStock(currentProduct)
+  };
+}
+
+/*
+  ADD TO CART / BUY NOW
+*/
+
 function addToCart(goToCart){
+
   if(!currentProduct) return;
 
   if(!isProductActive(currentProduct)){
@@ -820,67 +854,84 @@ function addToCart(goToCart){
     return;
   }
 
-  const id=getProductId(currentProduct);
-  const productName=getProductName(currentProduct);
-  const price=getSelectedPrice();
-  const regularPrice=getRegularPrice();
-  const size=selectedSize?selectedSize.size:"";
-  const images=getProductImages(currentProduct);
+  /*
+    BUY NOW:
+    Save ONLY the selected product separately.
+    Do not add it to the normal cart.
+    Do not include existing cart products.
+  */
+
+  if(goToCart){
+
+    const buyNowItem=buildCartItem(quantity);
+
+    localStorage.setItem(
+      BUY_NOW_KEY,
+      JSON.stringify([buyNowItem])
+    );
+
+    window.location.href="products.html?checkout=1&mode=buy-now";
+
+    return;
+  }
+
+  /*
+    ADD TO CART:
+    Update the normal shopping cart only.
+  */
 
   const cart=getCart();
 
+  const newItem=buildCartItem(quantity);
+
   const existing=cart.find(item=>
-    String(item.id || item.productId)===id &&
-    String(item.size || "")===size
+    String(item.id ?? item.productId)===newItem.id &&
+    String(item.size || "")===newItem.size
   );
 
   const alreadyInCart=existing
-    ? Number(existing.qty || existing.quantity || 0)
+    ? Math.max(0,Number(existing.qty ?? existing.quantity ?? 0))
     : 0;
 
   if(alreadyInCart+quantity>stock){
-    alert("You already have "+alreadyInCart+
-      " in your cart. Only "+stock+" items are available in total.");
+    alert(
+      "You already have "+alreadyInCart+
+      " in your cart. Only "+stock+
+      " items are available in total."
+    );
 
     return;
   }
 
   if(existing){
-    existing.qty=alreadyInCart+quantity;
-    existing.quantity=existing.qty;
-    existing.price=price;
-    existing.originalPrice=regularPrice;
-    existing.discountPrice=price<regularPrice?price:null;
-    existing.name=productName;
-    existing.title=productName;
-    existing.image=images[0] || existing.image || "";
+
+    const newQuantity=alreadyInCart+quantity;
+
+    existing.qty=newQuantity;
+    existing.quantity=newQuantity;
+
+    existing.price=newItem.price;
+    existing.originalPrice=newItem.originalPrice;
+    existing.discountPrice=newItem.discountPrice;
+
+    existing.name=newItem.name;
+    existing.title=newItem.title;
+
+    existing.image=newItem.image || existing.image || "";
     existing.stockQuantity=stock;
 
   }else{
-    cart.push({
-      id:currentProduct.id,
-      productId:currentProduct.id,
-      name:productName,
-      title:productName,
-      price:price,
-      originalPrice:regularPrice,
-      discountPrice:price<regularPrice?price:null,
-      size:size,
-      quantity:quantity,
-      qty:quantity,
-      image:images[0] || "",
-      stockQuantity:stock
-    });
+
+    cart.push(newItem);
+
   }
 
-  localStorage.setItem(CART_KEY,JSON.stringify(cart));
+  localStorage.setItem(
+    CART_KEY,
+    JSON.stringify(cart)
+  );
 
   updateCartCount();
-
-  if(goToCart){
-    window.location.href="cart.html";
-    return;
-  }
 
   const message=document.getElementById("message");
 
