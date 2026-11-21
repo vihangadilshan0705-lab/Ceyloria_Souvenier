@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -915,6 +914,15 @@ async function placeOrder() {
       return;
     }
 
+    const customer = authData.customer;
+
+    const customerDetails = {
+      name: customer.name || customer.fullName || "",
+      phone: customer.phone || customer.mobile || "",
+      email: customer.email || "",
+      address: customer.address || customer.deliveryAddress || ""
+    };
+
     const items = cart.map(item => ({
       productId: item.id || item.productId,
       quantity: Number(item.qty || item.quantity || 1),
@@ -931,6 +939,7 @@ async function placeOrder() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        customer: customerDetails,
         payment: document.getElementById("paymentMethod").value,
         country: document.getElementById("deliveryCountry").value,
         notes: document.getElementById("orderNotes").value || "",
@@ -941,7 +950,9 @@ async function placeOrder() {
     const result = await response.json();
 
     if (!response.ok || result.success === false) {
-      throw new Error(result.message || "Unable to place order.");
+      throw new Error(
+        result.error || result.message || "Unable to place order."
+      );
     }
 
     cart = [];
@@ -957,9 +968,11 @@ async function placeOrder() {
     }
 
   } catch(error) {
-    console.error(error);
+    console.error("Order error:", error);
+
     message.textContent =
       error.message || "Unable to place order. Please try again.";
+
     button.disabled = false;
   }
 }
